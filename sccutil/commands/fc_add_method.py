@@ -39,7 +39,7 @@ def main(argsv):
             if len(method_acl) > 0:
                 fapi.update_repository_method_acl(namespace=result['namespace'], method=result['name'],
                     snapshot_id=result['snapshotId'], acl_updates=method_acl)
-            print("https://api.firecloud.org/ga4gh/v1/tools/{}:{}/versions/{}/plain-WDL/descriptor".format(
+            print('import "https://api.firecloud.org/ga4gh/v1/tools/{}:{}/versions/{}/plain-WDL/descriptor"'.format(
                 result['namespace'], result['name'], result['snapshotId']))
         else:
             print('Unable to add {}'.format(method_name))
