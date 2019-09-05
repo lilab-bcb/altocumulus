@@ -13,6 +13,8 @@ def main(argsv):
     if do_plot:
         from dateutil.parser import parse
         import matplotlib.pyplot as plt
+        from pandas.plotting import register_matplotlib_converters
+        register_matplotlib_converters()
     max_memory_percent = 0
     max_cpu_percent = 0
     max_disk_percent = 0
