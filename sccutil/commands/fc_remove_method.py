@@ -24,16 +24,16 @@ def main(argsv):
                 fapi.delete_repository_method(method['namespace'], method['name'], method['snapshotId'])
                 print('Deleted {}/{}:{}'.format(method['namespace'], method['name'], method['snapshotId']))
     else:
-        selected_method = methods[0]
-        if method_version is None:  # delete latest version
-            version = -1
-            for method in methods:
-                if method['namespace'] == method_namespace and method['name'] == method_name:
-                    if method['snapshotId'] > version:
-                        version = method['snapshotId']
-                        selected_method = method
-
-        fapi.delete_repository_method(selected_method['namespace'], selected_method['name'],
-            selected_method['snapshotId'])
-        print('Deleted {}/{}:{}'.format(selected_method['namespace'], selected_method['name'],
-            selected_method['snapshotId']))
+        if method_version is None:  # delete all versions
+            for selected_method in methods:
+                if selected_method['namespace'] == method_namespace and selected_method['name'] == method_name:
+                    fapi.delete_repository_method(selected_method['namespace'], selected_method['name'],
+                        selected_method['snapshotId'])
+                    print('Deleted {}/{}:{}'.format(selected_method['namespace'], selected_method['name'],
+                        selected_method['snapshotId']))
+        else:
+            selected_method = methods[0]
+            fapi.delete_repository_method(selected_method['namespace'], selected_method['name'],
+                selected_method['snapshotId'])
+            print('Deleted {}/{}:{}'.format(selected_method['namespace'], selected_method['name'],
+                selected_method['snapshotId']))
