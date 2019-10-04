@@ -21,15 +21,15 @@ test_requirements = [
 ]
 
 setuptools.setup(
-    name='cumulus-util',
+    name='alto',
     version='0.1.0',
     description="Cumulus Utilities",
     author="Cumulus Team",
     author_email='cumulus@broadinstitute.org',
-    url='https://github.com/klarman-cell-observatory/cumulus_util',
+    url='https://github.com/klarman-cell-observatory/altocumulus',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(include=['cumulus_util']),
+    packages=setuptools.find_packages(include=['alto']),
     include_package_data=True,
     install_requires=requirements,
     license="BSD license",
