@@ -6,7 +6,7 @@ import uuid
 
 import pandas as pd
 
-import cumulus_util
+import alto
 
 
 def get_unique_url(unique_urls, base_url, name):
@@ -31,8 +31,8 @@ search_inside_file_whitelist = set(['txt', 'xlsx', 'tsv', 'csv'])
 
 
 def do_fc_upload(inputs, workspace, dry_run, bucket_folder):
-    workspace_namespace, workspace_name, workspace_version = cumulus_util.fs_split(workspace)
-    bucket = cumulus_util.get_or_create_workspace(workspace_namespace, workspace_name)['bucketName']
+    workspace_namespace, workspace_name, workspace_version = alto.fs_split(workspace)
+    bucket = alto.get_or_create_workspace(workspace_namespace, workspace_name)['bucketName']
     if bucket_folder is not None:
         bucket += '/' + bucket_folder
     unique_urls = set()
@@ -99,7 +99,7 @@ def main(argsv):
     args = parser.parse_args(argsv)
     for path in args.input:
         if not os.path.exists(path) or path.endswith('.json'):
-            inputs.update(cumulus_util.get_wdl_inputs(path))
+            inputs.update(alto.get_wdl_inputs(path))
         else:
             inputs.update({str(uuid.uuid1()): path})
     do_fc_upload(inputs, args.workspace, args.dry_run, args.bucket_folder)

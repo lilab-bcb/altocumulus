@@ -54,7 +54,7 @@ setuptools.setup(
     python_requires='>= 3',
     entry_points={
             'console_scripts': [
-                    'cumulus-util=cumulus_util.__main__:main'
+                    'alto=alto.__main__:main'
             ]
     }
 )
