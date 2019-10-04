@@ -21,7 +21,7 @@ test_requirements = [
 ]
 
 setuptools.setup(
-    name='cumulus_util',
+    name='cumulus-util',
     version='0.1.0',
     description="Cumulus Utilities",
     author="Cumulus Team",
@@ -54,7 +54,7 @@ setuptools.setup(
     python_requires='>= 3',
     entry_points={
             'console_scripts': [
-                    'cumulus_util=cumulus_util.__main__:main'
+                    'cumulus-util=cumulus_util.__main__:main'
             ]
     }
 )
