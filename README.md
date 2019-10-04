@@ -7,3 +7,6 @@ Command line utilities for running workflows on the cloud including:
     upload referenced files to workspace Google bucket.
 - Bulk delete methods in FireCloud/Terra. 
 - Parse monitoring log files to determine optimal instance type and disk space.
+
+## Usage
+- Type `alto` for a list of all commands.
