@@ -21,15 +21,15 @@ test_requirements = [
 ]
 
 setuptools.setup(
-    name='cumulus-util',
+    name='cumulus_util',
     version='0.1.0',
     description="Cumulus Utilities",
     author="Cumulus Team",
     author_email='cumulus@broadinstitute.org',
-    url='https://github.com/klarman-cell-observatory/cumulus-util',
+    url='https://github.com/klarman-cell-observatory/cumulus_util',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(include=['cumulus-util']),
+    packages=setuptools.find_packages(include=['cumulus_util']),
     include_package_data=True,
     install_requires=requirements,
     license="BSD license",
@@ -54,7 +54,7 @@ setuptools.setup(
     python_requires='>= 3',
     entry_points={
             'console_scripts': [
-                    'cumulus-util=cumulus_util.__main__:main'
+                    'cumulus_util=cumulus_util.__main__:main'
             ]
     }
 )
