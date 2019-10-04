@@ -1,15 +1,15 @@
 import argparse
 from firecloud import api as fapi
-import sccutil
+import cumulus_util
 
 
 def main(argsv):
     parser = argparse.ArgumentParser(description='Download one or more methods from FireCloud')
     parser.add_argument('-m', '--method', dest='method', action='store', required=True,
-        help=sccutil.METHOD_HELP)
+        help=cumulus_util.METHOD_HELP)
 
     args = parser.parse_args(argsv)
-    method_namespace, method_name, method_version = sccutil.fs_split(args.method)
+    method_namespace, method_name, method_version = cumulus_util.fs_split(args.method)
     list_methods = fapi.list_repository_methods(namespace=method_namespace, name=method_name, snapshotId=method_version)
     if list_methods.status_code != 200:
         raise ValueError('Unable to list methods ' + ' - ' + str(list_methods.json))
