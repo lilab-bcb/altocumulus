@@ -4,7 +4,7 @@ from typing import Union
 
 from firecloud import api as fapi
 
-import sccutil
+import cumulus_util
 
 
 def convert_inputs(inputs: dict) -> dict:
@@ -37,8 +37,8 @@ def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_jso
     Returns:
         URL to check submission status
    """
-    inputs = sccutil.get_wdl_inputs(wdl_inputs)
-    method_namespace, method_name, method_version = sccutil.fs_split(method)
+    inputs = cumulus_util.get_wdl_inputs(wdl_inputs)
+    method_namespace, method_name, method_version = cumulus_util.fs_split(method)
     if method_version is None:
         version = -1
         list_methods = fapi.list_repository_methods(namespace = method_namespace, name = method_name)
@@ -54,11 +54,11 @@ def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_jso
 
     root_entity = None
     launch_entity = None
-    workspace_namespace, workspace_name, workspace_version = sccutil.fs_split(workspace)
-    sccutil.get_or_create_workspace(workspace_namespace, workspace_name)
+    workspace_namespace, workspace_name, workspace_version = cumulus_util.fs_split(workspace)
+    cumulus_util.get_or_create_workspace(workspace_namespace, workspace_name)
 
     if out_json is not None:
-        sccutil.do_fc_upload(inputs, workspace, False, bucket_folder)
+        cumulus_util.do_fc_upload(inputs, workspace, False, bucket_folder)
         with open(out_json, 'w') as fout:
             json.dump(inputs, fout)
     config_namespace = method_namespace
@@ -107,7 +107,7 @@ def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_jso
 def main(argsv):
     parser = argparse.ArgumentParser(
         description='Run a FireCloud method. Optionally upload files/directories to the workspace Google Cloud bucket.')
-    parser.add_argument('-m', '--method', dest='method', action='store', required=True, help=sccutil.METHOD_HELP)
+    parser.add_argument('-m', '--method', dest='method', action='store', required=True, help=cumulus_util.METHOD_HELP)
     parser.add_argument('-w', '--workspace', dest='workspace', action='store', required=True,
                         help='Workspace name (e.g. foo/bar). The workspace is created if it does not exist')
     parser.add_argument('--bucket-folder', metavar='<folder>', dest='bucket_folder', action='store',

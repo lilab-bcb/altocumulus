@@ -1,7 +1,7 @@
 import argparse
 from firecloud import api as fapi
 import os
-import sccutil
+import cumulus_util
 
 
 def main(argsv):
@@ -19,7 +19,7 @@ def main(argsv):
             method_name = method_name[0:suffix]
         method_acl = []
         try:
-            existing_method = sccutil.get_latest_method(namespace, method_name)
+            existing_method = cumulus_util.get_latest_method(namespace, method_name)
             method_acl = fapi.get_repository_method_acl(namespace=existing_method['namespace'],
                 method=existing_method['name'], snapshot_id=existing_method['snapshotId']).json()
         except ValueError:

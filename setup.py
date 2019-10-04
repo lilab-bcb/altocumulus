@@ -21,15 +21,15 @@ test_requirements = [
 ]
 
 setuptools.setup(
-    name='sccutil',
+    name='cumulus-util',
     version='0.1.0',
-    description="scCloud Utilities",
-    author="scCloud Team",
-    author_email='sccloud@broadinstitute.org',
-    url='https://github.com/klarman-cell-observatory/sccutil',
+    description="Cumulus Utilities",
+    author="Cumulus Team",
+    author_email='cumulus@broadinstitute.org',
+    url='https://github.com/klarman-cell-observatory/cumulus-util',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(include=['sccutil']),
+    packages=setuptools.find_packages(include=['cumulus-util']),
     include_package_data=True,
     install_requires=requirements,
     license="BSD license",
@@ -54,7 +54,7 @@ setuptools.setup(
     python_requires='>= 3',
     entry_points={
             'console_scripts': [
-                    'sccutil=sccutil.__main__:main'
+                    'cumulus-util=cumulus_util.__main__:main'
             ]
     }
 )

@@ -1,15 +1,15 @@
 import argparse
 from firecloud import api as fapi
-import sccutil
+import cumulus_util
 
 
 def main(argsv):
     parser = argparse.ArgumentParser(description='Remove one or more methods from FireCloud')
 
-    parser.add_argument('-m', '--method', dest='method', action='store', required=True, help=sccutil.METHOD_HELP)
+    parser.add_argument('-m', '--method', dest='method', action='store', required=True, help=cumulus_util.METHOD_HELP)
     args = parser.parse_args(argsv)
 
-    method_namespace, method_name, method_version = sccutil.fs_split(args.method)
+    method_namespace, method_name, method_version = cumulus_util.fs_split(args.method)
     if method_namespace is None:
         raise ValueError('No namespace specified')
     if method_name == '':
