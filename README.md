@@ -1,4 +1,4 @@
-# cumulus_util
+# alto
 Command line utilities for running workflows on the cloud including:
 
 - Add/update methods in FireCloud/Terra.
