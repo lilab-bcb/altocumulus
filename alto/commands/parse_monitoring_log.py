@@ -1,5 +1,7 @@
 import argparse
 
+from dateutil.parser import parse
+
 
 def main(argsv):
     parser = argparse.ArgumentParser(description='Output maximum CPU, memory, and disk from monitoring log file')
@@ -10,8 +12,8 @@ def main(argsv):
     do_plot = args.plot is not None
 
     path = args.path
+
     if do_plot:
-        from dateutil.parser import parse
         import matplotlib.pyplot as plt
         from pandas.plotting import register_matplotlib_converters
         register_matplotlib_converters()
