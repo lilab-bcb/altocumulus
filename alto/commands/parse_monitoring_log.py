@@ -22,12 +22,15 @@ def main(argsv):
     max_disk_percent = 0
 
     times = []
-    cpu_times = []
-    memory_times = []
-    disk_times = []
-    cpu = None
-    memory = None
-    disk = None
+    cpu_values = []
+    memory_values = []
+    disk_values = []
+    cpus = None
+    cpu_str = None
+    total_memory = None
+    total_memory_str = None
+    total_disk = None
+    total_disk_str = None
     with open(path) as f:
         for line in f:
             line = line.strip()
@@ -36,39 +39,51 @@ def main(argsv):
             if line.startswith('* CPU usage:'):
                 value = float(line[line.index(':') + 1:len(line) - 1])
                 if do_plot:
-                    cpu_times.append(value)
+                    cpu_values.append(value)
                 max_cpu_percent = max(max_cpu_percent, value)
             elif line.startswith('* Memory usage:'):
                 value = float(line[line.index(':') + 1:len(line) - 1])
                 if do_plot:
-                    memory_times.append(value)
+                    memory_values.append(value)
                 max_memory_percent = max(max_memory_percent, value)
             elif line.startswith('* Disk usage:'):
                 value = float(line[line.index(':') + 1:len(line) - 1])
                 if do_plot:
-                    disk_times.append(value)
+                    disk_values.append(value)
                 max_disk_percent = max(max_disk_percent, value)
             elif line.startswith('#CPU'):
-                cpu = int(line[line.index(':') + 1:len(line)])
+                cpus = int(line[line.index(':') + 1:len(line)])
+                cpu_str = line
             elif line.startswith('Total Memory:'):
-                memory = float(line[line.index(':') + 1:len(line) - 1])
+                total_memory_str = line
+                total_memory = float(line[line.index(':') + 1:len(line) - 1])
             elif line.startswith('Total Disk space:'):
-                disk = float(line[line.index(':') + 1:len(line) - 1])
+                total_disk_str = line
+                total_disk = float(line[line.index(':') + 1:len(line) - 1])
 
     if do_plot:
-        plt.subplot(311)
-        plt.plot_date(times, cpu_times, '-')
-        plt.xlabel('Time')
-        plt.ylabel('% CPU')
+        # convert times to elapsed times
 
+        plt.subplot(311)
+        start_time = times[0]
+        new_times = []
+        for i in range(len(times)):
+            elapsed = ((times[i] - start_time).total_seconds()) / 60.0
+            new_times.append(elapsed)
+
+        times = new_times
+
+        plt.plot(times, cpu_values)
+        plt.suptitle(cpu_str + ', ' + total_memory_str + ', ' + total_disk_str)
+        plt.ylabel('% CPU')
         plt.subplot(312)
-        plt.plot_date(times, memory_times, '-')
-        plt.xlabel('Time')
+        plt.plot(times, memory_values)
+
         plt.ylabel('% Memory')
 
         plt.subplot(313)
-        plt.plot_date(times, disk_times, '-')
-        plt.xlabel('Time')
+        plt.plot(times, disk_values)
+        plt.xlabel('Elapsed Minutes')
         plt.ylabel('% Disk')
 
         plt.savefig(args.plot)
@@ -76,6 +91,6 @@ def main(argsv):
     print('Max memory %: {}'.format(max_memory_percent))
     print('Max disk %: {}'.format(max_disk_percent))
 
-    print('Max cpus: {} / {}'.format(max_cpu_percent / 100 * cpu, cpu))
-    print('Max memory: {} / {}'.format(max_memory_percent / 100 * memory, memory))
-    print('Max disk: {} / {}'.format(max_disk_percent / 100 * disk, disk))
+    print('Max cpus: {} / {}'.format(max_cpu_percent / 100 * cpus, cpus))
+    print('Max memory: {} / {}'.format(max_memory_percent / 100 * total_memory, total_memory))
+    print('Max disk: {} / {}'.format(max_disk_percent / 100 * total_disk, total_disk))
