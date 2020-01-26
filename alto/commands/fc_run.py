@@ -24,7 +24,8 @@ def convert_inputs(inputs: dict) -> dict:
     return results
 
 
-def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_json: str, bucket_folder: str) -> str:
+def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_json: str, bucket_folder: str,
+              cache: bool) -> str:
     """Run a FireCloud method.
 
     Args:
@@ -33,6 +34,7 @@ def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_jso
         wdl_inputs: WDL input JSON.
         upload: Whether to upload inputs and convert local file paths to gs:// URLs.
         bucket_folder: The folder under google bucket for uploading files.
+        cache: Use call cache if applicable.
 
     Returns:
         URL to check submission status
@@ -41,7 +43,7 @@ def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_jso
     method_namespace, method_name, method_version = alto.fs_split(method)
     if method_version is None:
         version = -1
-        list_methods = fapi.list_repository_methods(namespace = method_namespace, name = method_name)
+        list_methods = fapi.list_repository_methods(namespace=method_namespace, name=method_name)
         if list_methods.status_code != 200:
             raise ValueError('Unable to list methods ' + ' - ' + str(list_methods.json))
         methods = list_methods.json()
@@ -65,24 +67,25 @@ def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_jso
     config_name = method_name
 
     method_body = {
-        'name': config_name,
-        'namespace': config_namespace,
-        'methodRepoMethod': {'methodNamespace': method_namespace, 'methodName': method_name,
-                             'methodVersion': method_version, 'sourceRepo': 'agora',
-                             'methodUri': 'agora://{0}/{1}/{2}'.format(method_namespace, method_name, method_version)},
-        'rootEntityType': root_entity,
-        'prerequisites': {},
-        'inputs': convert_inputs(inputs),
-        'outputs': {},
-        'methodConfigVersion': 1,
-        'deleted': False
+            'name': config_name,
+            'namespace': config_namespace,
+            'methodRepoMethod': {'methodNamespace': method_namespace, 'methodName': method_name,
+                                 'methodVersion': method_version, 'sourceRepo': 'agora',
+                                 'methodUri': 'agora://{0}/{1}/{2}'.format(method_namespace, method_name,
+                                     method_version)},
+            'rootEntityType': root_entity,
+            'prerequisites': {},
+            'inputs': convert_inputs(inputs),
+            'outputs': {},
+            'methodConfigVersion': 1,
+            'deleted': False
     }
 
     config_exists = fapi.get_workspace_config(workspace_namespace, workspace_name, config_namespace, config_name)
 
     if config_exists.status_code == 200:
         config_submission = fapi.update_workspace_config(workspace_namespace, workspace_name, config_namespace,
-                                                         config_name, method_body)
+            config_name, method_body)
         if config_submission.status_code != 200:
             raise ValueError('Unable to update workspace config. Response: ' + str(config_submission.status_code))
 
@@ -92,12 +95,12 @@ def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_jso
             raise ValueError('Unable to create workspace config - ' + str(config_submission.json()))
 
     launch_submission = fapi.create_submission(workspace_namespace, workspace_name, config_namespace, config_name,
-                                               launch_entity, root_entity, "")
+        launch_entity, root_entity, "", use_callcache=cache)
 
     if launch_submission.status_code == 201:
         submission_id = launch_submission.json()['submissionId']
         url = 'https://portal.firecloud.org/#workspaces/{}/{}/monitor/{}'.format(workspace_namespace, workspace_name,
-                                                                                 submission_id)
+            submission_id)
 
         return url
     else:
@@ -109,15 +112,16 @@ def main(argsv):
         description='Run a FireCloud method. Optionally upload files/directories to the workspace Google Cloud bucket.')
     parser.add_argument('-m', '--method', dest='method', action='store', required=True, help=alto.METHOD_HELP)
     parser.add_argument('-w', '--workspace', dest='workspace', action='store', required=True,
-                        help='Workspace name (e.g. foo/bar). The workspace is created if it does not exist')
+        help='Workspace name (e.g. foo/bar). The workspace is created if it does not exist')
     parser.add_argument('--bucket-folder', metavar='<folder>', dest='bucket_folder', action='store',
-                        help='Store inputs to <folder> under workspace''s google bucket')
+        help='Store inputs to <folder> under workspace''s google bucket')
     parser.add_argument('-i', '--input', dest='wdl_inputs', action='store', required=True,
-                        help='WDL input JSON.')
+        help='WDL input JSON.')
     parser.add_argument('-o', '--upload', dest='out_json', metavar='<updated_json>', action='store',
-                        help='Upload files/directories to the workspace Google Cloud bucket and output updated input json (with local path replaced by google bucket urls) to <updated_json>.')
+        help='Upload files/directories to the workspace Google Cloud bucket and output updated input json (with local path replaced by google bucket urls) to <updated_json>.')
+    parser.add_argument('--no-cache', dest='no_cache', action='store_true', help='Disable call caching.')
     # parser.add_argument('-c', '--config_name', dest='config_name', action='store', required=False,
     #                     help='Method configuration name')
     args = parser.parse_args(argsv)
-    url = do_fc_run(args.method, args.workspace, args.wdl_inputs, args.out_json, args.bucket_folder)
+    url = do_fc_run(args.method, args.workspace, args.wdl_inputs, args.out_json, args.bucket_folder, not args.no_cache)
     print(url)
