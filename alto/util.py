@@ -8,18 +8,27 @@ from firecloud import api as fapi
 warnings.filterwarnings('ignore', 'Your application has authenticated', UserWarning, 'google')
 
 
-def get_latest_method(method_namespace, method_name):
-    list_methods = fapi.list_repository_methods(namespace=method_namespace, name=method_name)
-    if list_methods.status_code != 200:
-        raise ValueError('Unable to list methods ' + ' - ' + str(list_methods.json))
-    methods = list_methods.json()
-    version = -1
-    for method in methods:
-        version = max(version, method['snapshotId'])
-    if version == -1:
-        raise ValueError(method_name + ' not found')
+def get_method(method_namespace: str, method_name: str, method_version: int = None) -> JSON:
+    """
+        If method_version is None, get the latest snapshot
+    """
+    if method_version is None:    
+        list_methods = fapi.list_repository_methods(namespace=method_namespace, name=method_name)
+        if list_methods.status_code != 200:
+            raise ValueError('Unable to list methods ' + ' - ' + str(list_methods.json()))
+        methods = list_methods.json()
+        version = -1
+        for method in methods:
+            version = max(version, method['snapshotId'])
+        if version == -1:
+            raise ValueError(method_name + ' not found')
+        method_version = version    
 
-    return fapi.get_repository_method(method_namespace, method_name, version).json()
+    method_def = fapi.get_repository_method(method_namespace, method_name, method_version)
+    if method_def.status_code != 200:
+        raise ValueError('Unable to fetch method {0}/{1}/{2} - {3}'.format(method_namespace, method_name, method_version, str(method_def.json())))
+
+    return method_def.json()
 
 
 def get_or_create_workspace(workspace_namespace, workspace_name):
