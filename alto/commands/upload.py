@@ -144,7 +144,7 @@ def transfer_sample_sheet(input_file: str, input_file_to_output_gsurl: dict, gsu
         orig_file = input_file
         input_file = tempfile.mkstemp()[1]
         print('Rewriting file {0} to {1}'.format(orig_file, input_file))
-        out_sep = ',' if orig_file.ends('.csv') else '\t'
+        out_sep = ',' if orig_file.endswith('.csv') else '\t'
         df.to_csv(input_file, sep=out_sep, index=False, header=False)
 
     return input_file, is_changed
