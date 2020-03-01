@@ -53,7 +53,7 @@ class lane_manager:
                     self.lanes.add(i)
 
     def get_lanes(self) -> List[str]:
-        if self.isall:
+        if self.isall or len(self.lanes) == 0:
             return ['*']
         res = []
         for lane in list(self.lanes):
@@ -99,8 +99,8 @@ def transfer_data(source: str, dest: str, dry_run: bool = False, flowcells: Dict
     print(('Dry run: ' if dry_run else '') + 'Uploading  ' + source + ' to ' + dest)
 
     if path_is_flowcell(source):
-        assert flowcells is not None
-        transfer_flowcell(source, dest, dry_run, flowcells[source].get_lanes())
+        lanes = flowcells[source].get_lanes() if flowcells is not None else ['*']
+        transfer_flowcell(source, dest, dry_run, lanes)
     else:
         if os.path.isdir(source):
             run_command(['gsutil', '-m', 'rsync', '-r', source, dest], dry_run)
