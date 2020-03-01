@@ -178,7 +178,7 @@ def upload_to_google_bucket(inputs: Dict[str, str], workspace: str, dry_run: boo
                 input_path, is_changed = transfer_sample_sheet(input_path, input_file_to_output_gsurl, gsurl_gen, dry_run)
 
             transfer_data(input_path, input_gs_url, dry_run = dry_run)
-            input[k] = input_gs_url
+            inputs[k] = input_gs_url
             if is_changed:
                 os.remove(input_path)
 
