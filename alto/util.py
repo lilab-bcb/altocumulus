@@ -7,8 +7,10 @@ from firecloud import api as fapi
 
 warnings.filterwarnings('ignore', 'Your application has authenticated', UserWarning, 'google')
 
+METHOD_HELP = 'Method namespace/name (e.g. regev/cellranger_mkfastq_count). A version can optionally be specified (e.g. regev/cell_ranger_mkfastq_count/4), otherwise the latest version of the method is used.'
 
-def get_method(method_namespace: str, method_name: str, method_version: int = None) -> JSON:
+
+def get_method(method_namespace: str, method_name: str, method_version: int = None) -> "JSON":
     """
         If method_version is None, get the latest snapshot
     """
@@ -79,4 +81,20 @@ def fs_split(s: str) -> Tuple[str, str, str]:
     return namespace, name, version
 
 
-METHOD_HELP = 'Method namespace/name (e.g. regev/cellranger_mkfastq_count). A version can optionally be specified (e.g. regev/cell_ranger_mkfastq_count/4), otherwise the latest version of the method is used.'
+def create_submission(workspace_namespace: str, workspace_name: str, config_namespace: str, config_name: str, launch_entity: str, root_entity: str, use_callcache: bool = True) -> "Response":
+    """
+        Note that this function is adapted from fiss/firecloud/api.py/create_submission
+    """
+    uri = "workspaces/{0}/{1}/submissions".format(workspace_namespace, workspace_name)
+    body = {
+        "methodConfigurationNamespace" : config_namespace,
+        "methodConfigurationName" : config_name,
+        "useCallCache" : use_callcache
+    }
+
+    if launch_entity is not None:
+        body["entityType"] = launch_entity
+    if root_entity is not None:
+        body["entityName"] = root_entity
+
+    return fapi.__post(uri, json = body)
