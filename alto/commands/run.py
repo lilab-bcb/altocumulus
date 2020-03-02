@@ -1,10 +1,8 @@
 import argparse
-import json
 from typing import Union
 
-from firecloud import api as fapi
-
 import alto
+from firecloud import api as fapi
 
 
 def convert_inputs(inputs: dict) -> dict:
@@ -24,8 +22,8 @@ def convert_inputs(inputs: dict) -> dict:
     return results
 
 
-def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_json: str, bucket_folder: str,
-              cache: bool) -> str:
+def submit_job_to_terra(method: str, workspace: str, wdl_inputs: Union[str, dict], out_json: str, bucket_folder: str,
+                        cache: bool) -> str:
     """Run a FireCloud method.
 
     Args:
@@ -39,30 +37,26 @@ def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_jso
     Returns:
         URL to check submission status
    """
-    inputs = alto.get_wdl_inputs(wdl_inputs)
-    method_namespace, method_name, method_version = alto.fs_split(method)
-    if method_version is None:
-        version = -1
-        list_methods = fapi.list_repository_methods(namespace=method_namespace, name=method_name)
-        if list_methods.status_code != 200:
-            raise ValueError('Unable to list methods ' + ' - ' + str(list_methods.json))
-        methods = list_methods.json()
-        for method in methods:
-            assert method['namespace'] == method_namespace
-            version = max(version, method['snapshotId'])
-        if version == -1:
-            raise ValueError(method_name + ' not found')
-        method_version = version
+    inputs = alto.get_wdl_inputs(wdl_inputs)  # parse input
 
-    root_entity = None
-    launch_entity = None
+    # check method exists and get latest snapshot if version is not provided
+    method_namespace, method_name, method_version = alto.fs_split(method)
+    method_def = alto.get_method(method_namespace, method_name, method_version)
+    method_version = method_def['snapshotId'] if method_version is None else method_version
+
+    # check workspace exists
     workspace_namespace, workspace_name, workspace_version = alto.fs_split(workspace)
     alto.get_or_create_workspace(workspace_namespace, workspace_name)
 
+    # upload input data to google bucket and generate modified JSON input file
     if out_json is not None:
-        alto.do_fc_upload(inputs, workspace, False, bucket_folder)
-        with open(out_json, 'w') as fout:
-            json.dump(inputs, fout)
+        alto.upload_to_google_bucket(inputs, workspace, False, bucket_folder, out_json)
+
+    # Do not use data model
+    root_entity = None
+    launch_entity = None
+
+    # update method configuration
     config_namespace = method_namespace
     config_name = method_name
 
@@ -87,21 +81,22 @@ def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_jso
         config_submission = fapi.update_workspace_config(workspace_namespace, workspace_name, config_namespace,
             config_name, method_body)
         if config_submission.status_code != 200:
-            raise ValueError('Unable to update workspace config. Response: ' + str(config_submission.status_code))
-
+            raise ValueError(
+                'Unable to update workspace config. Response: ' + str(config_submission.status_code) + '-' + str(
+                    config_submission.json()))
     else:
         config_submission = fapi.create_workspace_config(workspace_namespace, workspace_name, method_body)
         if config_submission.status_code != 201:
             raise ValueError('Unable to create workspace config - ' + str(config_submission.json()))
 
-    launch_submission = fapi.create_submission(workspace_namespace, workspace_name, config_namespace, config_name,
-        launch_entity, root_entity, "", use_callcache=cache)
+    # submit job to terra
+    launch_submission = alto.create_submission(workspace_namespace, workspace_name, config_namespace, config_name,
+        launch_entity, root_entity, use_callcache=cache)
 
     if launch_submission.status_code == 201:
         submission_id = launch_submission.json()['submissionId']
-        url = 'https://portal.firecloud.org/#workspaces/{}/{}/monitor/{}'.format(workspace_namespace, workspace_name,
+        url = 'https://app.terra.bio/#workspaces/{0}/{1}/job_history/{2}'.format(workspace_namespace, workspace_name,
             submission_id)
-
         return url
     else:
         raise ValueError('Unable to launch submission - ' + str(launch_submission.json()))
@@ -109,7 +104,7 @@ def do_fc_run(method: str, workspace: str, wdl_inputs: Union[str, dict], out_jso
 
 def main(argsv):
     parser = argparse.ArgumentParser(
-        description='Run a FireCloud method. Optionally upload files/directories to the workspace Google Cloud bucket.')
+        description='Run a Broad Methods Repository method. Optionally upload files/directories to the workspace Google Cloud bucket.')
     parser.add_argument('-m', '--method', dest='method', action='store', required=True, help=alto.METHOD_HELP)
     parser.add_argument('-w', '--workspace', dest='workspace', action='store', required=True,
         help='Workspace name (e.g. foo/bar). The workspace is created if it does not exist')
@@ -123,5 +118,6 @@ def main(argsv):
     # parser.add_argument('-c', '--config_name', dest='config_name', action='store', required=False,
     #                     help='Method configuration name')
     args = parser.parse_args(argsv)
-    url = do_fc_run(args.method, args.workspace, args.wdl_inputs, args.out_json, args.bucket_folder, not args.no_cache)
+    url = submit_job_to_terra(args.method, args.workspace, args.wdl_inputs, args.out_json, args.bucket_folder,
+        not args.no_cache)
     print(url)

@@ -6,8 +6,7 @@ from alto.commands import *
 
 
 def main():
-    command_list = [fc_add_method, fc_download_method, fc_inputs, fc_remove_method, fc_run, sample_sheet, fc_upload,
-                    parse_monitoring_log]
+    command_list = [run, upload, add_method, download_method, remove_method, create_input_stub, sample_sheet, parse_monitoring_log]
     parser = argparse.ArgumentParser(description='Run an alto command')
     command_list_strings = list(map(lambda x: x.__name__[len('alto.commands.'):], command_list))
     parser.add_argument('command', help='The command', choices=command_list_strings)
