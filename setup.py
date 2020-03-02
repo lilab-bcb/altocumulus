@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 requirements = [
-        'firecloud', 'pandas'
+        'firecloud', 'numpy', 'pandas', 'python-dateutil', 'matplotlib'
 ]
 
 setup_requirements = [
@@ -22,7 +22,7 @@ test_requirements = [
 
 setuptools.setup(
     name='alto',
-    version='0.1.0',
+    version='0.2.0',
     description="Cumulus Utilities",
     author="Cumulus Team",
     author_email='cumulus@broadinstitute.org',
