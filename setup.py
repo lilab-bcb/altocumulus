@@ -22,7 +22,8 @@ test_requirements = [
 
 setuptools.setup(
     name='alto',
-    version='0.2.0',
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     description="Cumulus Utilities",
     author="Cumulus Team",
     author_email='cumulus@broadinstitute.org',
@@ -50,7 +51,6 @@ setuptools.setup(
     ],
     test_suite='tests',
     tests_require=test_requirements,
-    setup_requires=setup_requirements,
     python_requires='>= 3',
     entry_points={
             'console_scripts': [
