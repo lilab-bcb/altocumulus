@@ -4,13 +4,15 @@ import os
 import subprocess
 import tempfile
 
+import alto
 import pkg_resources
 from firecloud import api as fapi
 
-import alto
 
-
-def create_input_stub(method, out, config):
+def create_input_json(method, out, config):
+    """
+     Create JSON method input for specified method and config.
+    """
     method_namespace, method_name, method_version = alto.fs_split(method)
     if method_namespace is None:
         raise ValueError('Method should be specified as namespace/name (e.g. regev/drop-seq)')
@@ -68,4 +70,4 @@ def main(argsv):
         help='Repository config to use for generating input.json stub (e.g. regev/drop-seq-MMUL_8_0_1')
     parser.add_argument('-o', '--out', dest='out', action='store', required=True, help='JSON output file')
     args = parser.parse_args(argsv)
-    create_input_stub(args.method, args.out, args.config)
+    create_input_json(args.method, args.out, args.config)

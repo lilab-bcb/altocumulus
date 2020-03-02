@@ -1,10 +1,8 @@
 import argparse
-import json
 from typing import Union
 
-from firecloud import api as fapi
-
 import alto
+from firecloud import api as fapi
 
 
 def convert_inputs(inputs: dict) -> dict:
@@ -25,7 +23,7 @@ def convert_inputs(inputs: dict) -> dict:
 
 
 def submit_job_to_terra(method: str, workspace: str, wdl_inputs: Union[str, dict], out_json: str, bucket_folder: str,
-              cache: bool) -> str:
+                        cache: bool) -> str:
     """Run a FireCloud method.
 
     Args:
@@ -39,7 +37,7 @@ def submit_job_to_terra(method: str, workspace: str, wdl_inputs: Union[str, dict
     Returns:
         URL to check submission status
    """
-    inputs = alto.get_wdl_inputs(wdl_inputs) # parse input
+    inputs = alto.get_wdl_inputs(wdl_inputs)  # parse input
 
     # check method exists and get latest snapshot if version is not provided
     method_namespace, method_name, method_version = alto.fs_split(method)
@@ -63,17 +61,18 @@ def submit_job_to_terra(method: str, workspace: str, wdl_inputs: Union[str, dict
     config_name = method_name
 
     method_body = {
-        'name': config_name,
-        'namespace': config_namespace,
-        'methodRepoMethod': {'methodNamespace': method_namespace, 'methodName': method_name,
-                             'methodVersion': method_version, 'sourceRepo': 'agora',
-                             'methodUri': 'agora://{0}/{1}/{2}'.format(method_namespace, method_name, method_version)},
-        'rootEntityType': root_entity,
-        'prerequisites': {},
-        'inputs': convert_inputs(inputs),
-        'outputs': {},
-        'methodConfigVersion': 1,
-        'deleted': False
+            'name': config_name,
+            'namespace': config_namespace,
+            'methodRepoMethod': {'methodNamespace': method_namespace, 'methodName': method_name,
+                                 'methodVersion': method_version, 'sourceRepo': 'agora',
+                                 'methodUri': 'agora://{0}/{1}/{2}'.format(method_namespace, method_name,
+                                     method_version)},
+            'rootEntityType': root_entity,
+            'prerequisites': {},
+            'inputs': convert_inputs(inputs),
+            'outputs': {},
+            'methodConfigVersion': 1,
+            'deleted': False
     }
 
     config_exists = fapi.get_workspace_config(workspace_namespace, workspace_name, config_namespace, config_name)
@@ -82,7 +81,9 @@ def submit_job_to_terra(method: str, workspace: str, wdl_inputs: Union[str, dict
         config_submission = fapi.update_workspace_config(workspace_namespace, workspace_name, config_namespace,
             config_name, method_body)
         if config_submission.status_code != 200:
-            raise ValueError('Unable to update workspace config. Response: ' + str(config_submission.status_code) + '-' + str(config_submission.json()))
+            raise ValueError(
+                'Unable to update workspace config. Response: ' + str(config_submission.status_code) + '-' + str(
+                    config_submission.json()))
     else:
         config_submission = fapi.create_workspace_config(workspace_namespace, workspace_name, method_body)
         if config_submission.status_code != 201:
@@ -94,7 +95,8 @@ def submit_job_to_terra(method: str, workspace: str, wdl_inputs: Union[str, dict
 
     if launch_submission.status_code == 201:
         submission_id = launch_submission.json()['submissionId']
-        url = 'https://app.terra.bio/#workspaces/{0}/{1}/job_history/{2}'.format(workspace_namespace, workspace_name, submission_id)
+        url = 'https://app.terra.bio/#workspaces/{0}/{1}/job_history/{2}'.format(workspace_namespace, workspace_name,
+            submission_id)
         return url
     else:
         raise ValueError('Unable to launch submission - ' + str(launch_submission.json()))
@@ -116,5 +118,6 @@ def main(argsv):
     # parser.add_argument('-c', '--config_name', dest='config_name', action='store', required=False,
     #                     help='Method configuration name')
     args = parser.parse_args(argsv)
-    url = submit_job_to_terra(args.method, args.workspace, args.wdl_inputs, args.out_json, args.bucket_folder, not args.no_cache)
+    url = submit_job_to_terra(args.method, args.workspace, args.wdl_inputs, args.out_json, args.bucket_folder,
+        not args.no_cache)
     print(url)
