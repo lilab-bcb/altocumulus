@@ -12,17 +12,14 @@ requirements = [
         'firecloud', 'pandas'
 ]
 
-setup_requirements = [
-        # put setup requirements (distutils extensions, etc.) here
-]
-
 test_requirements = [
         'unittest'
 ]
 
 setuptools.setup(
     name='alto',
-    version='0.1.0',
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     description="Cumulus Utilities",
     author="Cumulus Team",
     author_email='cumulus@broadinstitute.org',
@@ -50,7 +47,6 @@ setuptools.setup(
     ],
     test_suite='tests',
     tests_require=test_requirements,
-    setup_requires=setup_requirements,
     python_requires='>= 3',
     entry_points={
             'console_scripts': [
