@@ -24,7 +24,7 @@ setuptools.setup(
     name='alto',
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
-    description="Cumulus Utilities",
+    description="Command line utilities for running workflows",
     author="Cumulus Team",
     author_email='cumulus@broadinstitute.org',
     url='https://github.com/klarman-cell-observatory/altocumulus',
