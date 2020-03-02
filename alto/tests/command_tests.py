@@ -1,9 +1,8 @@
 import os
 import unittest
 
-import pandas as pd
-
 import alto
+import pandas as pd
 
 
 class CommandTests(unittest.TestCase):
@@ -33,15 +32,14 @@ class CommandTests(unittest.TestCase):
 
     def test_upload_sample_sheet(self):
         alto.commands.sample_sheet.main(['-d', 'inputs', '-o', 'test_sample_sheet.txt'])
-        alto.commands.upload.main(['--dry-run', '-w', 'cumulus-dev/test', 'test_sample_sheet.txt'])
+        alto.commands.upload.main(['--dry-run', '-w', 'regev-development/test', 'test_sample_sheet.txt'])
         os.remove('test_sample_sheet.txt')
 
     def test_run(self):
-        alto.commands.run.main(['-m', 'broadgdac/echo', '-i', 'test.json', '-w', 'cumulus-dev/test'])
+        alto.commands.run.main(['-m', 'broadgdac/echo', '-i', 'test.json', '-w', 'regev-development/test'])
 
     def test_inputs(self):
         alto.commands.create_input_stub.main(['-m', 'broadgdac/echo', '-o', 'test-inputs.json'])
-        os.remove('test.json')
 
     def test_add_method(self):
         alto.commands.add_method.main(['-n', 'cumulus-dev', 'inputs/echo.wdl'])
