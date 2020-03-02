@@ -5,7 +5,7 @@ import alto
 
 
 def main(argsv):
-    parser = argparse.ArgumentParser(description='Add one or more methods to FireCloud')
+    parser = argparse.ArgumentParser(description='Add one or more methods to Broad Methods Repository')
     parser.add_argument('-n', '--namespace', dest='namespace', action='store', required=True, help='Methods namespace')
     parser.add_argument('-p', '--public', dest='public', action='store_true', help='Make methods publicly readable')
     parser.add_argument(dest='wdl', help='Path to WDL file.', nargs='+')
@@ -19,7 +19,7 @@ def main(argsv):
             method_name = method_name[0:suffix]
         method_acl = []
         try:
-            existing_method = alto.get_latest_method(namespace, method_name)
+            existing_method = alto.get_method(namespace, method_name)
             method_acl = fapi.get_repository_method_acl(namespace=existing_method['namespace'],
                 method=existing_method['name'], snapshot_id=existing_method['snapshotId']).json()
         except ValueError:
