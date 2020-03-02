@@ -4,7 +4,7 @@ import alto
 
 
 def main(argsv):
-    parser = argparse.ArgumentParser(description='Download one or more methods from FireCloud')
+    parser = argparse.ArgumentParser(description='Download one or more methods from Broad Methods Repository')
     parser.add_argument('-m', '--method', dest='method', action='store', required=True,
         help=alto.METHOD_HELP)
 
