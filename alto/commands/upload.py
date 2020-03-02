@@ -73,6 +73,9 @@ def run_command(command: List[str], dry_run: bool) -> None:
 
 def transfer_flowcell(source: str, dest: str, dry_run: bool, lanes: List[str]) -> None:
     run_command(['gsutil', 'cp', '{0}/RunInfo.xml'.format(source), '{0}/RunInfo.xml'.format(dest)], dry_run)
+    assert os.path.exists('{0}/RTAComplete.txt'.format(source)) and os.path.exists('{0}/runParameters.xml'.format(source))
+    run_command(['gsutil', 'cp', '{0}/RTAComplete.txt'.format(source), '{0}/RTAComplete.txt'.format(dest)], dry_run)
+    run_command(['gsutil', 'cp', '{0}/runParameters.xml'.format(source), '{0}/runParameters.xml'.format(dest)], dry_run)
     basecall_string = '{0}/Data/Intensities/BaseCalls'
     if len(lanes) == 1 and lanes[0] == '*':
         # find all lanes
@@ -123,12 +126,11 @@ def transfer_sample_sheet(input_file: str, input_file_to_output_gsurl: dict, gsu
     col_names = np.char.array(df.iloc[0,:], unicode = True).lower()
 
     if ('flowcell' in col_names) and ('lane' in col_names):
-        df = df[1:]
         df.columns = col_names
-        for idx, row in df.iterrows():
+        for idx, row in df[1:].iterrows():
             flowcells[row['flowcell']].update_lanes(row['lane'])
 
-    for idx, row in df.iterrows():
+    for idx, row in df[1:].iterrows():
         for idxc, value in row.iteritems():
             if isinstance(value, str) and os.path.exists(value):
                 value = os.path.abspath(value)
