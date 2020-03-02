@@ -21,7 +21,7 @@ test_requirements = [
 ]
 
 setuptools.setup(
-    name='alto',
+    name='altocumulus',
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     description="Command line utilities for running workflows",
