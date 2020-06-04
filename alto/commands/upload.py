@@ -24,11 +24,11 @@ class gsurl_factory:
 
     def get_unique_url(self, input_path: str):
         counter = 1
-        uniq_gsurl = 'gs://{bucket}/{name}'.format(bucket = self.bucket, name = os.path.basename(input_path))
+        uniq_gsurl = f'gs://{self.bucket}/{os.path.basename(input_path)}'
         root, ext = os.path.splitext(uniq_gsurl)
         while uniq_gsurl in self.unique_urls:
             counter += 1
-            uniq_gsurl = '{0}_{1}{2}'.format(root, counter, ext)
+            uniq_gsurl = f'{root}_{counter}{ext}'
         self.unique_urls.add(uniq_gsurl)
 
         return uniq_gsurl
@@ -57,12 +57,12 @@ class lane_manager:
             return ['*']
         res = []
         for lane in list(self.lanes):
-            res.append('L{0:03}'.format(lane))
+            res.append(f'L{lane:03}')
         return res
 
 
 def path_is_flowcell(path: str) -> bool:
-    return os.path.isdir(path) and os.path.exists('{0}/RunInfo.xml'.format(path))
+    return os.path.isdir(path) and os.path.exists(f'{path}/RunInfo.xml')
 
 
 def run_command(command: List[str], dry_run: bool) -> None:
@@ -72,10 +72,17 @@ def run_command(command: List[str], dry_run: bool) -> None:
 
 
 def transfer_flowcell(source: str, dest: str, dry_run: bool, lanes: List[str]) -> None:
-    run_command(['gsutil', 'cp', '{0}/RunInfo.xml'.format(source), '{0}/RunInfo.xml'.format(dest)], dry_run)
-    assert os.path.exists('{0}/RTAComplete.txt'.format(source)) and os.path.exists('{0}/runParameters.xml'.format(source))
-    run_command(['gsutil', 'cp', '{0}/RTAComplete.txt'.format(source), '{0}/RTAComplete.txt'.format(dest)], dry_run)
-    run_command(['gsutil', 'cp', '{0}/runParameters.xml'.format(source), '{0}/runParameters.xml'.format(dest)], dry_run)
+    run_command(['gsutil', 'cp', f'{source}/RunInfo.xml', f'{dest}/RunInfo.xml'], dry_run)
+    assert os.path.exists(f'{source}/RTAComplete.txt')
+    run_command(['gsutil', 'cp', f'{source}/RTAComplete.txt', f'{dest}/RTAComplete.txt'], dry_run)
+
+    if os.path.exists(f'{source}/runParameters.xml'):
+        run_command(['gsutil', 'cp', f'{source}/runParameters.xml', f'{dest}/runParameters.xml'], dry_run)
+    elif os.path.exists(f'{source}/RunParameters.xml'):
+        run_command(['gsutil', 'cp', f'{source}/RunParameters.xml', f'{dest}/RunParameters.xml'], dry_run)
+    else:
+        raise FileNotFoundError("Cannot find either runParameters.xml or RunParameters.xml!")
+    
     basecall_string = '{0}/Data/Intensities/BaseCalls'
     if len(lanes) == 1 and lanes[0] == '*':
         # find all lanes
@@ -145,7 +152,7 @@ def transfer_sample_sheet(input_file: str, input_file_to_output_gsurl: dict, gsu
     if is_changed:
         orig_file = input_file
         input_file = tempfile.mkstemp()[1]
-        print('Rewriting file {0} to {1}'.format(orig_file, input_file))
+        print(f'Rewriting file {orig_file} to {input_file}.')
         out_sep = ',' if orig_file.endswith('.csv') else '\t'
         df.to_csv(input_file, sep=out_sep, index=False, header=False)
 
