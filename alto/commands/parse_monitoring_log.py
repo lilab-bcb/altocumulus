@@ -1,6 +1,6 @@
 import argparse
 
-from dateutil.parser import parse
+from dateutil.parser import parse, ParserError
 
 
 def main(argsv):
@@ -35,7 +35,10 @@ def main(argsv):
         for line in f:
             line = line.strip()
             if line.startswith('[') and line.endswith(']'):
-                times.append(parse(line[1:len(line) - 1]))
+                try:
+                    times.append(parse(line[1:len(line) - 1]))
+                except ParserError:
+                    pass
             if line.startswith('* CPU usage:'):
                 value = float(line[line.index(':') + 1:len(line) - 1])
                 if do_plot:
