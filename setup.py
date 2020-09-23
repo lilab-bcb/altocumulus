@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 requirements = [
-        'firecloud', 'numpy', 'pandas', 'python-dateutil', 'matplotlib'
+        'firecloud', 'numpy', 'pandas', 'python-dateutil', 'matplotlib', 'six'
 ]
 
 setup_requirements = [
