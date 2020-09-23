@@ -1,6 +1,6 @@
 import argparse
 
-from dateutil.parser import parse, ParserError
+from dateutil.parser import parse
 
 
 def main(argsv):
@@ -37,7 +37,7 @@ def main(argsv):
             if line.startswith('[') and line.endswith(']'):
                 try:
                     times.append(parse(line[1:len(line) - 1]))
-                except ParserError:
+                except:
                     pass
             if line.startswith('* CPU usage:'):
                 value = float(line[line.index(':') + 1:len(line) - 1])
