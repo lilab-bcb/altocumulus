@@ -7,7 +7,7 @@ from six.moves.urllib.parse import urljoin
 def main(argv):
     parser = argparse.ArgumentParser(
         description='Export workspace storage cost estimates to TSV')
-    parser.add_argument('--output', help='Output TSV path')
+    parser.add_argument('--output', help='Output TSV path', required=True)
     parser.add_argument('--access', help='Workspace access levels', choices=['owner', 'reader', 'writer'],
         action='append')
     args = parser.parse_args(argv)
