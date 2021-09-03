@@ -45,14 +45,13 @@ def get_or_create_workspace(workspace_namespace, workspace_name):
 
 
 def get_wdl_inputs(wdl_inputs):
+    float_parser = lambda x: (float(x), x)
     if type(wdl_inputs) != dict:
         if os.path.exists(wdl_inputs):
             with open(wdl_inputs, 'r') as f:
-                return json.loads(f.read())
-                # Filter out any key/values that contain #, and escape strings with quotes as MCs need this to not be treated as expressions
-                # inputs = {k: "\"{}\"".format(v) for k, v in inputs_json.items() if '#' not in k}
+                return json.loads(f.read(), parse_float=float_parser)
         elif type(wdl_inputs) == str:
-            return json.loads(wdl_inputs)
+            return json.loads(wdl_inputs, parse_float=float_parser)
         else:
             print('Unknown input type: ' + str(type(wdl_inputs)))
     return wdl_inputs
