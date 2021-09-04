@@ -10,6 +10,9 @@ def convert_inputs(inputs: dict) -> dict:
     for key, value in inputs.items():
         if isinstance(value, bool):
             value = 'true' if value else 'false'
+        elif isinstance(value, tuple):
+            # input is float, (float, str)
+            value = value[1]
         elif isinstance(value, str):
             value = '"{0}"'.format(value)
         elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], str):
