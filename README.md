@@ -10,7 +10,9 @@ Command line utilities for running workflows on [Terra](https://app.terra.bio/) 
 Re: useful links:
 
 [FireCloud Swagger](https://api.firecloud.org/)
+
 [Dockstore Swagger](https://dockstore.org/api/static/swagger-ui/index.html)
+
 [fiss](https://github.com/broadinstitute/fiss) In particular, look at the api.py
 
 ## Installation
