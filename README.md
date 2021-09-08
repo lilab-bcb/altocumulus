@@ -1,14 +1,17 @@
 # altocumulus
 
-Command line utilities for running workflows on [Terra](https://app.terra.bio/) including:
+Command line utilities for running workflows on [Terra](https://app.terra.bio/) or [CromWell] including:
 
-- Add/update methods in Terra.
-- Generate a Terra WDL input.json stub.
 - Run a Terra method. Replace local file paths with workspace Google Cloud bucket URLs. Automatically 
     upload referenced files to workspace Google bucket.
 - Bulk add/delete methods in Terra. 
 - Parse monitoring log files to determine optimal instance type and disk space.
 
+Re: useful links:
+
+[FireCloud Swagger](https://api.firecloud.org/)
+[Dockstore Swagger](https://dockstore.org/api/static/swagger-ui/index.html)
+[fiss](https://github.com/broadinstitute/fiss) In particular, look at the api.py
 
 ## Installation
 
