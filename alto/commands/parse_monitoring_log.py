@@ -1,22 +1,22 @@
 import argparse
-
 from dateutil.parser import parse
 
 
-def main(argsv):
+
+def main(argv):
     parser = argparse.ArgumentParser(description='Output maximum CPU, memory, and disk from monitoring log file')
     parser.add_argument(dest='path', help='Path to monitoring log file.')
-    parser.add_argument('--plot', dest='plot', action='store', required=False,
-        help='Optional filename to create a plot of utilization vs. time')
-    args = parser.parse_args(argsv)
-    do_plot = args.plot is not None
+    parser.add_argument('--plot', dest='plot', action='store', required=False, help='Optional filename to create a plot of utilization vs. time')
+    args = parser.parse_args(argv)
 
+    do_plot = args.plot is not None
     path = args.path
 
     if do_plot:
         import matplotlib.pyplot as plt
         from pandas.plotting import register_matplotlib_converters
         register_matplotlib_converters()
+
     max_memory_percent = 0
     max_cpu_percent = 0
     max_disk_percent = 0
@@ -31,6 +31,7 @@ def main(argsv):
     total_memory_str = None
     total_disk = None
     total_disk_str = None
+
     with open(path) as f:
         for line in f:
             line = line.strip()
@@ -90,6 +91,7 @@ def main(argsv):
         plt.ylabel('% Disk')
 
         plt.savefig(args.plot)
+        
     print('Max cpu %: {}'.format(max_cpu_percent))
     print('Max memory %: {}'.format(max_memory_percent))
     print('Max disk %: {}'.format(max_disk_percent))
