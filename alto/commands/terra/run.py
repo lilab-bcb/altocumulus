@@ -102,6 +102,7 @@ def submit_to_terra(
     # update workflow configuration in the workspace
     method_body = {
         'namespace': config_namespace,
+        'name': config_name,
         'rootEntityType': None, # Do not use data model
         'inputs': convert_inputs(inputs),
         'outputs': {},
