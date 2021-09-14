@@ -1,6 +1,6 @@
 # altocumulus
 
-Command line utilities for running workflows on [Terra](https://app.terra.bio/) or [CromWell](https://github.com/broadinstitute/cromwell) including:
+Command line utilities for running workflows on [Terra](https://app.terra.bio/) or [Cromwell](https://github.com/broadinstitute/cromwell) including:
 
 - Run a Terra method. Replace local file paths with workspace Google Cloud bucket URLs. Automatically
     upload referenced files to workspace Google bucket.
@@ -17,7 +17,7 @@ Re: useful links:
 
 ## Installation
 
-    git clone https://github.com/klarman-cell-observatory/altocumulus.git
+    git clone https://github.com/lilab-bcb/altocumulus.git
     cd altocumulus
     pip install -e .
 
