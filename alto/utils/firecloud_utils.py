@@ -25,7 +25,7 @@ def parse_firecloud_workflow(workflow_string: str) -> Tuple[str, str, int]:
     Examples
     --------
     >>> method_namespace, method_name, method_version = parse_firecloud_workflow('cumulus/cumulus/43')
-    """ 
+    """
     fields = workflow_string.split('/')
     if len(fields) < 2 or len(fields) > 3:
         raise ValueError(f"workflow_string should contain only 2 or 3 items. But {workflow_string} contains {len(fields)} items!")
@@ -66,7 +66,7 @@ def get_firecloud_workflow(method_namespace: str, method_name: str, method_versi
     method_record = None
 
     if method_version is not None:
-        method_def = fapi.get_repository_method(method_namespace, method_name, method_version)    
+        method_def = fapi.get_repository_method(method_namespace, method_name, method_version)
         if method_def.status_code != 200:
             raise ValueError(f"Unable to fetch workflow {method_namespace}/{method_name}/{method_version} - {method_def.json()}!")
         method_record = method_def.json()
@@ -127,7 +127,7 @@ def update_workflow_config_in_workspace(config_namespace: str, config_name: str,
 
 
 def submit_a_job_to_terra(workspace_namespace: str, workspace_name: str, config_namespace: str, config_name: str, use_callcache: bool = True) -> str:
-    """Create a job submission to Terra and if success, return a URL for checking job status. 
+    """Create a job submission to Terra and if success, return a URL for checking job status.
     """
     launch_submission = fapi.create_submission(workspace_namespace, workspace_name, config_namespace, config_name, use_callcache = use_callcache)
     if launch_submission.status_code != 201:
