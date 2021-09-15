@@ -25,4 +25,4 @@ def main(argv):
     )
 
     args = parser.parse_args(argv)
-    abort_job(args.server, args.port, args.job_id, args.no_ssl_verify)
+    abort_job(args.server, args.port, args.job_id)
