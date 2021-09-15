@@ -44,8 +44,8 @@ def read_wdl_inputs(input_json: str) -> dict:
 
 class cloud_url_factory: # class to make sure all cloud urls are unique
     def __init__(self, backend, bucket): # here bucket should also include bucket folder information
-        assert backend in {'gs', 'aws'}
-        self.scheme = 'gs' if backend == 'gs' else 's3'
+        assert backend in {'gcp', 'aws'}
+        self.scheme = 'gs' if backend == 'gcp' else 's3'
         self.bucket = bucket
         self.unique_urls = set()
 
