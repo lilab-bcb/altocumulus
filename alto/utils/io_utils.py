@@ -26,10 +26,10 @@ def read_wdl_inputs(input_json: str) -> dict:
 
     Examples
     --------
-    >>> wdl_inputs = get_wdl_inputs('inputs.json')
-    """ 
+    >>> wdl_inputs = read_wdl_inputs('inputs.json')
+    """
     float_parser = lambda x: (float(x), x)
-    
+
     assert isinstance(input_json, str)
 
     wdl_inputs = None
@@ -44,8 +44,8 @@ def read_wdl_inputs(input_json: str) -> dict:
 
 class cloud_url_factory: # class to make sure all cloud urls are unique
     def __init__(self, backend, bucket): # here bucket should also include bucket folder information
-        assert backend in {'gs', 'aws'}
-        self.scheme = 'gs' if backend == 'gs' else 's3'
+        assert backend in {'gcp', 'aws'}
+        self.scheme = 'gs' if backend == 'gcp' else 's3'
         self.bucket = bucket
         self.unique_urls = set()
 
@@ -73,7 +73,7 @@ def transfer_data(source: str, dest: str, backend: str, dry_run: bool, flowcells
         transfer_flowcell(source, dest, backend, lanes, dry_run)
     else:
         if os.path.isdir(source):
-            run_command(['strato', '--backend', backend, '--ionice', '-m', 'rsync', '-r', source, dest], dry_run)
+            run_command(['strato', 'sync', '--backend', backend, '--ionice', '-m', source, dest], dry_run)
         else:
             run_command(['strato', 'cp', '--backend', backend, '--ionice', source, dest], dry_run)
 
@@ -152,7 +152,7 @@ def upload_to_cloud_bucket(inputs: Dict[str, str], backend: str, bucket: str, bu
     Examples
     --------
     >>> upload_to_cloud_bucket(inputs, 'gcp', 'my_bucket', 'input_files', 'updated_inputs.json', False)
-    """ 
+    """
     if bucket_folder is not None:
         bucket += f'/{bucket_folder}'
 
@@ -163,7 +163,7 @@ def upload_to_cloud_bucket(inputs: Dict[str, str], backend: str, bucket: str, bu
         input_path = v
         if isinstance(input_path, str) and os.path.exists(input_path):
             input_path = os.path.abspath(input_path)
-            if input_path in input_file_to_output_gsurl: # if this file has been processed, skip
+            if input_path in input_file_to_output_url: # if this file has been processed, skip
                 continue
 
             input_url = url_gen.get_unique_url(input_path)
