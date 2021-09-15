@@ -1,13 +1,17 @@
 import sys
 import argparse
-from alto.commands import terra, upload, parse_monitoring_log
+from alto.commands import terra, upload, parse_monitoring_log, cromwell
+
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def main():
-    str2module = {'terra': terra, 'upload': upload, 'parse_monitoring_log': parse_monitoring_log}
+    str2module = {'terra': terra, 'upload': upload, 'parse_monitoring_log': parse_monitoring_log, 'cromwell': cromwell}
 
     parser = argparse.ArgumentParser(description='Run an altocumulus command.')
-    parser.add_argument('command', help='The command', choices=['terra', 'upload', 'parse_monitoring_log'])
+    parser.add_argument('command', help='The command', choices=['terra', 'upload', 'parse_monitoring_log', 'cromwell'])
     parser.add_argument('command_args', help='The command arguments', nargs=argparse.REMAINDER)
     my_args = parser.parse_args()
 
