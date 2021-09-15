@@ -26,10 +26,10 @@ def read_wdl_inputs(input_json: str) -> dict:
 
     Examples
     --------
-    >>> wdl_inputs = get_wdl_inputs('inputs.json')
-    """ 
+    >>> wdl_inputs = read_wdl_inputs('inputs.json')
+    """
     float_parser = lambda x: (float(x), x)
-    
+
     assert isinstance(input_json, str)
 
     wdl_inputs = None
@@ -152,7 +152,7 @@ def upload_to_cloud_bucket(inputs: Dict[str, str], backend: str, bucket: str, bu
     Examples
     --------
     >>> upload_to_cloud_bucket(inputs, 'gcp', 'my_bucket', 'input_files', 'updated_inputs.json', False)
-    """ 
+    """
     if bucket_folder is not None:
         bucket += f'/{bucket_folder}'
 
