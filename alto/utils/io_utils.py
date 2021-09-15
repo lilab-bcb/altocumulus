@@ -163,7 +163,7 @@ def upload_to_cloud_bucket(inputs: Dict[str, str], backend: str, bucket: str, bu
         input_path = v
         if isinstance(input_path, str) and os.path.exists(input_path):
             input_path = os.path.abspath(input_path)
-            if input_path in input_file_to_output_gsurl: # if this file has been processed, skip
+            if input_path in input_file_to_output_url: # if this file has been processed, skip
                 continue
 
             input_url = url_gen.get_unique_url(input_path)
