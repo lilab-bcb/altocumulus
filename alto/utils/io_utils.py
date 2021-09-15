@@ -73,7 +73,7 @@ def transfer_data(source: str, dest: str, backend: str, dry_run: bool, flowcells
         transfer_flowcell(source, dest, backend, lanes, dry_run)
     else:
         if os.path.isdir(source):
-            run_command(['strato', '--backend', backend, '--ionice', '-m', 'rsync', '-r', source, dest], dry_run)
+            run_command(['strato', 'sync', '--backend', backend, '--ionice', '-m', source, dest], dry_run)
         else:
             run_command(['strato', 'cp', '--backend', backend, '--ionice', source, dest], dry_run)
 
