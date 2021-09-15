@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from alto.utils import upload_to_cloud_bucket, parse_workspace, get_workspace_info
+from alto.utils import upload_to_cloud_bucket, parse_workspace, get_workspace_info, read_wdl_inputs
 
 
 
@@ -40,8 +40,9 @@ def main(argv):
     inputs = {}
     for path in args.input:
         if not os.path.exists(path) or path.endswith('.json'):
-            inputs.update(alto.get_wdl_inputs(path))
+            inputs.update(read_wdl_inputs(path))
         else:
+            import uuid
             inputs.update({str(uuid.uuid1()): path})
-    
+
     upload_to_cloud_bucket(inputs, backend, bucket, args.bucket_folder, args.out_json, args.dry_run)
