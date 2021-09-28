@@ -183,4 +183,4 @@ def upload_to_cloud_bucket(inputs: Dict[str, str], backend: str, bucket: str, bu
 
     if out_json is not None:
         with open(out_json, 'w') as fout:
-            json.dump(inputs, fout)
+            json.dump(inputs, fout, indent=4)
