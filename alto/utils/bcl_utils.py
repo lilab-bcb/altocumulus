@@ -58,7 +58,7 @@ def transfer_flowcell(source: str, dest: str, backend: str, lanes: List[str], dr
     Examples
     --------
     >>> transfer_flowcell('flowcell', 'gs://my_bucket/flowcell', 'gcp', ['*'], False)
-    """ 
+    """
     run_command(['strato', 'cp', '--backend', backend, '--ionice', f'{source}/RunInfo.xml', f'{dest}/RunInfo.xml'], dry_run)
     if not os.path.exists(f'{source}/RTAComplete.txt'):
         raise FileNotFoundError("Cannot find RTAComplete.txt. Please check if sequencing is completed!")
@@ -70,7 +70,7 @@ def transfer_flowcell(source: str, dest: str, backend: str, lanes: List[str], dr
         run_command(['strato', 'cp', '--backend', backend, '--ionice', f'{source}/RunParameters.xml', f'{dest}/RunParameters.xml'], dry_run)
     else:
         raise FileNotFoundError("Cannot find either runParameters.xml or RunParameters.xml!")
-    
+
     basecall_string = '{0}/Data/Intensities/BaseCalls'
     if len(lanes) == 1 and lanes[0] == '*':
         # find all lanes
@@ -90,4 +90,4 @@ def transfer_flowcell(source: str, dest: str, backend: str, lanes: List[str], dr
     else:
         locs_string = '{0}/Data/Intensities/{1}'
         for lane in lanes:
-            run_command(['strato', '--backend', backend, '--ionice', '-m', 'rsync', '-r', locs_string.format(source, lane), locs_string.format(dest, lane)], dry_run)
+            run_command(['strato', 'sync', '--backend', backend, '--ionice', '-m', locs_string.format(source, lane), locs_string.format(dest, lane)], dry_run)
