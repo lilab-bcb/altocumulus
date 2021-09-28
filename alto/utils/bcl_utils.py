@@ -82,7 +82,7 @@ def transfer_flowcell(source: str, dest: str, backend: str, lanes: List[str], dr
     # copy bcl files
     for lane in lanes:
         lane_string = basecall_string + '/{1}'
-        run_command(['strato', '--backend', backend, '--ionice', '-m', 'rsync', '-r', lane_string.format(source, lane), lane_string.format(dest, lane)], dry_run)
+        run_command(['strato', 'sync', '--backend', backend, '--ionice', '-m', lane_string.format(source, lane), lane_string.format(dest, lane)], dry_run)
     # copy locs files
     locs_string = '{0}/Data/Intensities/s.locs'
     if os.path.exists(locs_string.format(source)):
