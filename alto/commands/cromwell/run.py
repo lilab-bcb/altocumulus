@@ -30,7 +30,7 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
         upload_to_cloud_bucket(inputs, backend, bucket_id, bucket_folder, out_json, False)
 
     files = {
-        'workflowInputs': open(out_json, 'rb'),
+        'workflowInputs': open(wf_input_path if out_json is None else out_json, 'rb'),
     }
 
     data = {
