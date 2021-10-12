@@ -11,7 +11,7 @@ def parse_bucket_folder_url(bucket):
     if res[0] == 'gs':
         backend = 'gcp'
 
-    res2 = res[1].strip('/').split('/')  # Remove the trailing slash if exists.
+    res2 = res[1].split('/')  # Remove the trailing slash if exists.
     bucket_id = res2[0]
     bucket_folder = '/'.join(res2[1:])
 
