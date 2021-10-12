@@ -154,7 +154,7 @@ def upload_to_cloud_bucket(inputs: Dict[str, str], backend: str, bucket: str, bu
     >>> upload_to_cloud_bucket(inputs, 'gcp', 'my_bucket', 'input_files', 'updated_inputs.json', False)
     """
     if bucket_folder is not None:
-        bucket += f'/{bucket_folder}'
+        bucket += f"/{bucket_folder.strip('/')}"
 
     url_gen = cloud_url_factory(backend, bucket)
     input_file_to_output_url = {}
