@@ -25,6 +25,6 @@ Re: useful links:
 - Type `alto` for a list of all commands.
 
 
-## Release note
+## Legacy Release
 
-Version 1.1.1, make sure that float values would look the same as in json input. For example, if 0.00005 is given, altocumulus will pass '0.00005' instead of '5e-05' to Terra.
+Version [1.1.1](https://github.com/klarman-cell-observatory/altocumulus), making sure that float values would look the same as in json input. For example, if 0.00005 is given, altocumulus will pass '0.00005' instead of '5e-05' to Terra.
