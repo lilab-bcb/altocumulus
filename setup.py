@@ -33,7 +33,7 @@ setuptools.setup(
     description="Command line utilities for running workflows",
     author="Cumulus Team",
     author_email='cumulus@broadinstitute.org',
-    url='https://github.com/klarman-cell-observatory/altocumulus',
+    url='https://github.com/lilab-bcb/altocumulus',
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(include=['alto']),
