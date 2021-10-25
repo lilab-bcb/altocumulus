@@ -1,18 +1,19 @@
-import argparse, requests
+import argparse, json, requests
 
 
-def get_status(server, port, job_id):
-    resp = requests.get(f"http://{server}:{port}/api/workflows/v1/{job_id}/status")
+def get_metadata(server, port, job_id):
+    resp = requests.get(f"http://{server}:{port}/api/workflows/v1/{job_id}/metadata")
     resp_dict = resp.json()
 
     if resp.status_code == 200:
-        print(f"Job {resp_dict['id']} is in status {resp_dict['status']}.")
+        with open(f"{job_id}.metadata.json", 'w') as fp:
+            json.dump(resp_dict, fp, indent=4)
     else:
         print(resp_dict['message'])
 
 def main(argv):
     parser = argparse.ArgumentParser(
-        description="Check the current status for a workflow on a Cromwell server."
+        description="Get workflow and call-level metadata for a submitted job."
     )
     parser.add_argument('-s', '--server', dest='server', action='store', required=True,
         help="Server hostname or IP address."
@@ -26,4 +27,4 @@ def main(argv):
 
     args = parser.parse_args(argv)
 
-    get_status(args.server, args.port, args.job_id)
+    get_metadata(args.server, args.port, args.job_id)

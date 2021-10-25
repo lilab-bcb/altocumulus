@@ -1,4 +1,4 @@
-import argparse, requests
+import argparse, requests, sys
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
 
@@ -18,7 +18,7 @@ def parse_bucket_folder_url(bucket):
     return (backend, bucket_id, bucket_folder)
 
 
-def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify):
+def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_ssl_verify):
     organization, collection, workflow, version = parse_dockstore_workflow(method_str)
     workflow_def = get_dockstore_workflow(organization, collection, workflow, version, ssl_verify=not no_ssl_verify)
 
@@ -47,6 +47,7 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
 
     if resp.status_code == 201:
         print(f"Job {resp_dict['id']} is in status {resp_dict['status']}.")
+        print(f"{resp_dict['id']}\n", file=sys.stderr)
     else:
         print(resp_dict['message'])
 
@@ -76,11 +77,11 @@ def main(argv):
         help="Cloud bucket folder for uploading local input data. Start with 's3://' if an AWS S3 bucket is used, 'gs://' for a Google bucket. \
         Must be specified when '-o' option is used."
     )
-    parser.add_argument('--no-cache', dest='no_cache', action='store_true', help="Disable call caching.")
+    #parser.add_argument('--no-cache', dest='no_cache', action='store_true', help="Disable call caching.")
     parser.add_argument('--no-ssl-verify', dest='no_ssl_verify', action='store_true', default=False,
         help="Disable SSL verification for web requests. Not recommended for general usage, but can be useful for intra-networks which don't support SSL verification."
     )
 
     args = parser.parse_args(argv)
 
-    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_cache, args.no_ssl_verify)
+    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_ssl_verify)
