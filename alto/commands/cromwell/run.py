@@ -1,6 +1,10 @@
-import argparse, requests, sys
+import argparse, getpass, json, requests, os, sys
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
+
+
+label_filename = '.workflow_label.json'
+wf_option_filename = '.workflow_options.json'
 
 
 def parse_bucket_folder_url(bucket):
@@ -18,7 +22,7 @@ def parse_bucket_folder_url(bucket):
     return (backend, bucket_id, bucket_folder)
 
 
-def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_ssl_verify):
+def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify):
     organization, collection, workflow, version = parse_dockstore_workflow(method_str)
     workflow_def = get_dockstore_workflow(organization, collection, workflow, version, ssl_verify=not no_ssl_verify)
 
@@ -37,11 +41,33 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
         'workflowUrl': workflow_def['url'],
     }
 
+    # Set username to the label
+    label_dict = {
+        'creator': getpass.getuser()
+    }
+    with open(label_filename, 'w') as fp:
+        json.dump(label_dict, fp)
+    files['labels'] = open(label_filename, 'rb')
+
+    if no_cache:
+        wf_option_dict = {
+            'write_to_cache': 'false',
+            'read_from_cache': 'false',
+        }
+        with open(wf_option_filename, 'w') as fp:
+            json.dump(wf_option_dict, fp)
+        files['workflowOptions'] = open(wf_option_filename, 'rb')
+
+
     resp = requests.post(
         f"http://{server}:{port}/api/workflows/v1",
         files=files,
         data=data,
     )
+
+    files['labels'].close()
+    if os.path.exists(label_filename):
+        os.remove(label_filename)
 
     resp_dict = resp.json()
 
@@ -77,11 +103,11 @@ def main(argv):
         help="Cloud bucket folder for uploading local input data. Start with 's3://' if an AWS S3 bucket is used, 'gs://' for a Google bucket. \
         Must be specified when '-o' option is used."
     )
-    #parser.add_argument('--no-cache', dest='no_cache', action='store_true', help="Disable call caching.")
+    parser.add_argument('--no-cache', dest='no_cache', action='store_true', help="Disable call caching.")
     parser.add_argument('--no-ssl-verify', dest='no_ssl_verify', action='store_true', default=False,
         help="Disable SSL verification for web requests. Not recommended for general usage, but can be useful for intra-networks which don't support SSL verification."
     )
 
     args = parser.parse_args(argv)
 
-    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_ssl_verify)
+    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_cache, args.no_ssl_verify)
