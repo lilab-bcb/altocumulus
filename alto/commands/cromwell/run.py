@@ -1,4 +1,4 @@
-import argparse, requests, sys
+import argparse, json, requests
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
 
@@ -18,7 +18,11 @@ def parse_bucket_folder_url(bucket):
     return (backend, bucket_id, bucket_folder)
 
 
-def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_ssl_verify):
+def wait_and_check(server, port, job_id, time_out, freq=30):
+
+
+
+def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_ssl_verify, time_out):
     organization, collection, workflow, version = parse_dockstore_workflow(method_str)
     workflow_def = get_dockstore_workflow(organization, collection, workflow, version, ssl_verify=not no_ssl_verify)
 
@@ -46,10 +50,15 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
     resp_dict = resp.json()
 
     if resp.status_code == 201:
-        print(f"Job {resp_dict['id']} is in status {resp_dict['status']}.")
-        print(f"{resp_dict['id']}\n", file=sys.stderr)
+        if time_out is None:
+            print(f"Job {resp_dict['id']} is in status {resp_dict['status']}.")
+        else:
+            print(f"{{\"job_id\": \"{resp_dict['id']}\"}}")
     else:
         print(resp_dict['message'])
+
+    if time_out is not None:
+        wait_and_check(server, port, resp_dict['id'], time_out)
 
 
 def main(argv):
@@ -81,7 +90,10 @@ def main(argv):
     parser.add_argument('--no-ssl-verify', dest='no_ssl_verify', action='store_true', default=False,
         help="Disable SSL verification for web requests. Not recommended for general usage, but can be useful for intra-networks which don't support SSL verification."
     )
+    parser.add_argument('--time-out', dest='time_out', type=float,
+        help="Keep on checking the job's status until time out is reached. (Unit: hours)"
+    )
 
     args = parser.parse_args(argv)
 
-    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_ssl_verify)
+    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_ssl_verify, args.time_out)
