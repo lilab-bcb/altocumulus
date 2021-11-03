@@ -27,23 +27,29 @@ def get_logs_per_task(server, port, job_id, meta_dict):
     resp_top_dict = resp_top.json()
 
     processed_tasks = set()
-    for task_name, log_list in resp_top_dict['calls'].items():
-        for log in log_list:
-            get_remote_log_file(log['stderr'], job_id)
-            get_remote_log_file(log['stdout'], job_id)
-        processed_tasks.add(task_name)
+    if 'calls' in resp_top_dict.keys():
+        for task_name, log_list in resp_top_dict['calls'].items():
+            for log in log_list:
+                get_remote_log_file(log['stderr'], job_id)
+                get_remote_log_file(log['stdout'], job_id)
+            processed_tasks.add(task_name)
+    else:
+        print("No call logs for this job.")
 
     # For tasks with subworkflow ID
-    for task_name, task_list in meta_dict['calls'].items():
-        if task_name not in processed_tasks:
-            for task in task_list:
-                subworkflow_id = task['subWorkflowId']
-                resp_task = requests.get(f"http://{server}:{port}/api/workflows/v1/{subworkflow_id}/logs")
-                resp_task_dict = resp_task.json()
-                for task_name, log_list in resp_task_dict['calls'].items():
-                    for log in log_list:
-                        get_remote_log_file(log['stderr'], job_id)
-                        get_remote_log_file(log['stdout'], job_id)
+    if 'calls' in meta_dict.keys():
+        for task_name, task_list in meta_dict['calls'].items():
+            if task_name not in processed_tasks:
+                for task in task_list:
+                    subworkflow_id = task['subWorkflowId']
+                    resp_task = requests.get(f"http://{server}:{port}/api/workflows/v1/{subworkflow_id}/logs")
+                    resp_task_dict = resp_task.json()
+                    for task_name, log_list in resp_task_dict['calls'].items():
+                        for log in log_list:
+                            get_remote_log_file(log['stderr'], job_id)
+                            get_remote_log_file(log['stdout'], job_id)
+    else:
+        print("No call logs for subworkflows of this job.")
 
 
 
