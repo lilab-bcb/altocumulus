@@ -41,8 +41,12 @@ def wait_and_check(server, port, job_id, time_out, freq=60):
 
 
 def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_ssl_verify, time_out):
-    organization, collection, workflow, version = parse_dockstore_workflow(method_str)
-    workflow_def = get_dockstore_workflow(organization, collection, workflow, version, ssl_verify=not no_ssl_verify)
+    is_url = False
+    if method_str.startswith("https://") or method_str.startswith("http://"):
+        is_url = True
+    else:
+        organization, collection, workflow, version = parse_dockstore_workflow(method_str)
+        workflow_def = get_dockstore_workflow(organization, collection, workflow, version, ssl_verify=not no_ssl_verify)
 
     inputs = read_wdl_inputs(wf_input_path)
 
@@ -56,7 +60,7 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
     }
 
     data = {
-        'workflowUrl': workflow_def['url'],
+        'workflowUrl': workflow_def['url'] if not is_url else method_str,
     }
 
     resp = requests.post(
@@ -93,7 +97,8 @@ def main(argv):
     )
     parser.add_argument('-m', '--method', dest='method_str', action='store', required=True,
         help="Workflow name from Dockstore, with name specified as organization:collection:name:version (e.g. broadinstitute:cumulus:cumulus:1.5.0). \
-        The default version would be used if version is omitted."
+              The default version would be used if version is omitted. \
+              Alternatively, a workflow URL in HTTPS or HTTP can be specified here."
     )
     parser.add_argument('-i', '--input', dest='input', action='store', required=True,
         help="Path to a local JSON file specifying workflow inputs."
