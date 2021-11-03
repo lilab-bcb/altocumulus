@@ -1,4 +1,4 @@
-import argparse, json, requests
+import argparse, json, requests, time
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
 
@@ -18,8 +18,26 @@ def parse_bucket_folder_url(bucket):
     return (backend, bucket_id, bucket_folder)
 
 
-def wait_and_check(server, port, job_id, time_out, freq=30):
+def wait_and_check(server, port, job_id, time_out, freq=60):
+    url = f"http://{server}:{port}/api/workflows/v1/{job_id}/status"
 
+    time_out_seconds = time_out * 3600
+    seconds_passed = 0
+
+    while seconds_passed < time_out_seconds:
+        time.sleep(freq)
+        seconds_passed += freq
+        resp = requests.get(url)
+        resp_dict = resp.json()
+        if resp.status_code == 200:
+            if resp_dict['status'] in ['Succeeded', 'Failed']:
+                break
+        else:
+            print(resp_dict['message'])
+            break
+
+    if seconds_passed >= time_out_seconds:
+        print(f"{time_out}-hour time-out is reached!")
 
 
 def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_ssl_verify, time_out):
@@ -91,7 +109,7 @@ def main(argv):
         help="Disable SSL verification for web requests. Not recommended for general usage, but can be useful for intra-networks which don't support SSL verification."
     )
     parser.add_argument('--time-out', dest='time_out', type=float,
-        help="Keep on checking the job's status until time out is reached. (Unit: hours)"
+        help="Keep on checking the job's status until time_out (in hours) is reached. Notice that if this option is set, Altocumulus won't terminate until reaching time_out."
     )
 
     args = parser.parse_args(argv)
