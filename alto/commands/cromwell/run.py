@@ -1,7 +1,8 @@
-import argparse, json, requests, time
+import argparse, json, os, requests, time
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
 
+wf_option_filename = ".workflow_options.json"
 
 def parse_bucket_folder_url(bucket):
     assert '://' in bucket, "Bucket folder URL must start with 's3://' or 'gs://'."
@@ -30,7 +31,7 @@ def wait_and_check(server, port, job_id, time_out, freq=60):
         resp = requests.get(url)
         resp_dict = resp.json()
         if resp.status_code == 200:
-            if resp_dict['status'] in ['Succeeded', 'Failed']:
+            if resp_dict['status'] in ['Succeeded', 'Failed', 'Aborted']:
                 break
         else:
             print(resp_dict['message'])
@@ -40,7 +41,7 @@ def wait_and_check(server, port, job_id, time_out, freq=60):
         print(f"{time_out}-hour time-out is reached!")
 
 
-def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_ssl_verify, time_out):
+def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify, time_out):
     is_url = False
     if method_str.startswith("https://") or method_str.startswith("http://"):
         is_url = True
@@ -63,11 +64,23 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
         'workflowUrl': workflow_def['url'] if not is_url else method_str,
     }
 
+    if no_cache:
+        wf_option_dict = {
+            'write_to_cache': False,
+            'read_from_cache': False,
+        }
+        with open(wf_option_filename, 'w') as fp:
+            json.dump(wf_option_dict, fp)
+        files['workflowOptions'] = open(wf_option_filename, 'rb')
+
     resp = requests.post(
         f"http://{server}:{port}/api/workflows/v1",
         files=files,
         data=data,
     )
+
+    if os.path.exists(wf_option_filename):
+        os.remove(wf_option_filename)
 
     resp_dict = resp.json()
 
@@ -109,7 +122,7 @@ def main(argv):
         help="Cloud bucket folder for uploading local input data. Start with 's3://' if an AWS S3 bucket is used, 'gs://' for a Google bucket. \
         Must be specified when '-o' option is used."
     )
-    #parser.add_argument('--no-cache', dest='no_cache', action='store_true', help="Disable call caching.")
+    parser.add_argument('--no-cache', dest='no_cache', action='store_true', help="Disable call-caching.")
     parser.add_argument('--no-ssl-verify', dest='no_ssl_verify', action='store_true', default=False,
         help="Disable SSL verification for web requests. Not recommended for general usage, but can be useful for intra-networks which don't support SSL verification."
     )
@@ -119,4 +132,4 @@ def main(argv):
 
     args = parser.parse_args(argv)
 
-    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_ssl_verify, args.time_out)
+    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_cache, args.no_ssl_verify, args.time_out)
