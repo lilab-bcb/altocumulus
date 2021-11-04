@@ -1,7 +1,9 @@
-import argparse, getpass, json, requests, os, sys
+import argparse, getpass, json, os, requests, time
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
 
+wf_label_filename = ".workflow_labels.json"
+wf_option_filename = ".workflow_options.json"
 
 label_filename = '.workflow_label.json'
 wf_option_filename = '.workflow_options.json'
@@ -22,9 +24,35 @@ def parse_bucket_folder_url(bucket):
     return (backend, bucket_id, bucket_folder)
 
 
-def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify):
-    organization, collection, workflow, version = parse_dockstore_workflow(method_str)
-    workflow_def = get_dockstore_workflow(organization, collection, workflow, version, ssl_verify=not no_ssl_verify)
+def wait_and_check(server, port, job_id, time_out, freq=60):
+    url = f"http://{server}:{port}/api/workflows/v1/{job_id}/status"
+
+    time_out_seconds = time_out * 3600
+    seconds_passed = 0
+
+    while seconds_passed < time_out_seconds:
+        time.sleep(freq)
+        seconds_passed += freq
+        resp = requests.get(url)
+        resp_dict = resp.json()
+        if resp.status_code == 200:
+            if resp_dict['status'] in ['Succeeded', 'Failed', 'Aborted', 'Aborting']:
+                break
+        else:
+            print(resp_dict['message'])
+            break
+
+    if seconds_passed >= time_out_seconds:
+        print(f"{time_out}-hour time-out is reached!")
+
+
+def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify, time_out):
+    is_url = False
+    if method_str.startswith("https://") or method_str.startswith("http://"):
+        is_url = True
+    else:
+        organization, collection, workflow, version = parse_dockstore_workflow(method_str)
+        workflow_def = get_dockstore_workflow(organization, collection, workflow, version, ssl_verify=not no_ssl_verify)
 
     inputs = read_wdl_inputs(wf_input_path)
 
@@ -38,26 +66,25 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
     }
 
     data = {
-        'workflowUrl': workflow_def['url'],
+        'workflowUrl': workflow_def['url'] if not is_url else method_str,
     }
 
     # Set username to the label
     label_dict = {
         'creator': getpass.getuser()
     }
-    with open(label_filename, 'w') as fp:
+    with open(wf_label_filename, 'w') as fp:
         json.dump(label_dict, fp)
-    files['labels'] = open(label_filename, 'rb')
+    files['labels'] = open(wf_label_filename, 'rb')
 
     if no_cache:
         wf_option_dict = {
-            'write_to_cache': 'false',
-            'read_from_cache': 'false',
+            'write_to_cache': False,
+            'read_from_cache': False,
         }
         with open(wf_option_filename, 'w') as fp:
             json.dump(wf_option_dict, fp)
         files['workflowOptions'] = open(wf_option_filename, 'rb')
-
 
     resp = requests.post(
         f"http://{server}:{port}/api/workflows/v1",
@@ -65,17 +92,23 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
         data=data,
     )
 
-    files['labels'].close()
-    if os.path.exists(label_filename):
-        os.remove(label_filename)
+    if os.path.exists(wf_label_filename):
+        os.remove(wf_label_filename)
+    if os.path.exists(wf_option_filename):
+        os.remove(wf_option_filename)
 
     resp_dict = resp.json()
 
     if resp.status_code == 201:
-        print(f"Job {resp_dict['id']} is in status {resp_dict['status']}.")
-        print(f"{resp_dict['id']}\n", file=sys.stderr)
+        if time_out is None:
+            print(f"Job {resp_dict['id']} is in status {resp_dict['status']}.")
+        else:
+            print(f"{{\"job_id\": \"{resp_dict['id']}\"}}")
     else:
         print(resp_dict['message'])
+
+    if time_out is not None:
+        wait_and_check(server, port, resp_dict['id'], time_out)
 
 
 def main(argv):
@@ -92,7 +125,8 @@ def main(argv):
     )
     parser.add_argument('-m', '--method', dest='method_str', action='store', required=True,
         help="Workflow name from Dockstore, with name specified as organization:collection:name:version (e.g. broadinstitute:cumulus:cumulus:1.5.0). \
-        The default version would be used if version is omitted."
+              The default version would be used if version is omitted. \
+              Alternatively, a workflow URL in HTTPS or HTTP can be specified here."
     )
     parser.add_argument('-i', '--input', dest='input', action='store', required=True,
         help="Path to a local JSON file specifying workflow inputs."
@@ -103,11 +137,14 @@ def main(argv):
         help="Cloud bucket folder for uploading local input data. Start with 's3://' if an AWS S3 bucket is used, 'gs://' for a Google bucket. \
         Must be specified when '-o' option is used."
     )
-    parser.add_argument('--no-cache', dest='no_cache', action='store_true', help="Disable call caching.")
+    parser.add_argument('--no-cache', dest='no_cache', action='store_true', help="Disable call-caching.")
     parser.add_argument('--no-ssl-verify', dest='no_ssl_verify', action='store_true', default=False,
         help="Disable SSL verification for web requests. Not recommended for general usage, but can be useful for intra-networks which don't support SSL verification."
+    )
+    parser.add_argument('--time-out', dest='time_out', type=float,
+        help="Keep on checking the job's status until time_out (in hours) is reached. Notice that if this option is set, Altocumulus won't terminate until reaching time_out."
     )
 
     args = parser.parse_args(argv)
 
-    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_cache, args.no_ssl_verify)
+    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_cache, args.no_ssl_verify, args.time_out)
