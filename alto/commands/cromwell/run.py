@@ -1,7 +1,8 @@
-import argparse, json, os, requests, time
+import argparse, getpass, json, os, requests, time
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
 
+wf_label_filename = ".workflow_labels.json"
 wf_option_filename = ".workflow_options.json"
 
 def parse_bucket_folder_url(bucket):
@@ -64,6 +65,14 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
         'workflowUrl': workflow_def['url'] if not is_url else method_str,
     }
 
+    # Set username to the label
+    label_dict = {
+        'creator': getpass.getuser()
+    }
+    with open(wf_label_filename, 'w') as fp:
+        json.dump(label_dict, fp)
+    files['labels'] = open(wf_label_filename, 'rb')
+
     if no_cache:
         wf_option_dict = {
             'write_to_cache': False,
@@ -79,6 +88,8 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
         data=data,
     )
 
+    if os.path.exists(wf_label_filename):
+        os.remove(wf_label_filename)
     if os.path.exists(wf_option_filename):
         os.remove(wf_option_filename)
 
