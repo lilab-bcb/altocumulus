@@ -2,11 +2,9 @@ import argparse, getpass, json, os, requests, time
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
 
+
 wf_label_filename = ".workflow_labels.json"
 wf_option_filename = ".workflow_options.json"
-
-label_filename = '.workflow_label.json'
-wf_option_filename = '.workflow_options.json'
 
 
 def parse_bucket_folder_url(bucket):
