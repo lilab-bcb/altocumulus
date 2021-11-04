@@ -31,7 +31,7 @@ def wait_and_check(server, port, job_id, time_out, freq=60):
         resp = requests.get(url)
         resp_dict = resp.json()
         if resp.status_code == 200:
-            if resp_dict['status'] in ['Succeeded', 'Failed', 'Aborted']:
+            if resp_dict['status'] in ['Succeeded', 'Failed', 'Aborted', 'Aborting']:
                 break
         else:
             print(resp_dict['message'])
