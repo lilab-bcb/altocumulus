@@ -42,14 +42,35 @@ def wait_and_check(server, port, job_id, time_out, freq=60):
         print(f"{time_out}-hour time-out is reached!")
 
 
-def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify, time_out):
+def parse_workflow_str(method_str, no_ssl_verify):
     is_url = False
-    if method_str.startswith("https://") or method_str.startswith("http://"):
+    workflow_str = method_str
+
+    if "://" in method_str:
+        assert method_str.split("://")[0] in ['http', 'https'], "Only http or https URL is acceptable!"
         is_url = True
-    else:
+    elif ":" in method_str:
         organization, collection, workflow, version = parse_dockstore_workflow(method_str)
         workflow_def = get_dockstore_workflow(organization, collection, workflow, version, ssl_verify=not no_ssl_verify)
+        is_url = True
+        workflow_str = workflow_def['url']
 
+    return workflow_str, is_url
+
+
+def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify, time_out):
+    files = dict()
+    data = dict()
+    label_dict = dict()
+
+    # Process job's workflow WDL
+    workflow_str, is_url = parse_workflow_str(method_str, no_ssl_verify)
+    if is_url:
+        data['workflowUrl'] = workflow_str
+    else:
+        files['workflowSource'] = open(workflow_str, 'rb')
+
+    # Process job's workflow inputs
     inputs = read_wdl_inputs(wf_input_path)
 
     # Upload input data to cloud bucket if needed.
@@ -57,42 +78,38 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
         backend, bucket_id, bucket_folder = parse_bucket_folder_url(bucket)
         upload_to_cloud_bucket(inputs, backend, bucket_id, bucket_folder, out_json, False)
 
-    files = {
-        'workflowInputs': open(wf_input_path if out_json is None else out_json, 'rb'),
-    }
+    files['workflowInputs'] = open(wf_input_path if out_json is None else out_json, 'rb')
 
-    data = {
-        'workflowUrl': workflow_def['url'] if not is_url else method_str,
-    }
+    # Add username to the job labels
+    label_dict['creator'] = getpass.getuser()
 
-    # Set username to the label
-    label_dict = {
-        'creator': getpass.getuser()
-    }
     with open(wf_label_filename, 'w') as fp:
         json.dump(label_dict, fp)
     files['labels'] = open(wf_label_filename, 'rb')
 
+    # Process job's workflow options.
     if no_cache:
         wf_option_dict = {
-            'write_to_cache': False,
             'read_from_cache': False,
         }
         with open(wf_option_filename, 'w') as fp:
             json.dump(wf_option_dict, fp)
         files['workflowOptions'] = open(wf_option_filename, 'rb')
 
+    # Send HTTP request to Cromwell server
     resp = requests.post(
         f"http://{server}:{port}/api/workflows/v1",
         files=files,
         data=data,
     )
 
+    # Remove intermediate input files
     if os.path.exists(wf_label_filename):
         os.remove(wf_label_filename)
     if os.path.exists(wf_option_filename):
         os.remove(wf_option_filename)
 
+    # Process response.
     resp_dict = resp.json()
 
     if resp.status_code == 201:
@@ -103,6 +120,7 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
     else:
         print(resp_dict['message'])
 
+    # Enter the monitor mode
     if time_out is not None:
         wait_and_check(server, port, resp_dict['id'], time_out)
 
@@ -120,9 +138,10 @@ def main(argv):
         help="Port number for Cromwell service. The default port is 8000."
     )
     parser.add_argument('-m', '--method', dest='method_str', action='store', required=True,
-        help="Workflow name from Dockstore, with name specified as organization:collection:name:version (e.g. broadinstitute:cumulus:cumulus:1.5.0). \
-              The default version would be used if version is omitted. \
-              Alternatively, a workflow URL in HTTPS or HTTP can be specified here."
+        help="Three forms of workflow WDL file is accepted: \
+              (1) Workflow name from Dockstore, with name specified as \"organization:collection:name:version\" (e.g. \"broadinstitute:cumulus:cumulus:1.5.0\"). If 'version' part is not specified, the default version defined on Dockstore would be used. \
+              (2) An HTTP or HTTPS URL of a WDL file. \
+              (3) A local path to a WDL file."
     )
     parser.add_argument('-i', '--input', dest='input', action='store', required=True,
         help="Path to a local JSON file specifying workflow inputs."
@@ -133,7 +152,7 @@ def main(argv):
         help="Cloud bucket folder for uploading local input data. Start with 's3://' if an AWS S3 bucket is used, 'gs://' for a Google bucket. \
         Must be specified when '-o' option is used."
     )
-    parser.add_argument('--no-cache', dest='no_cache', action='store_true', help="Disable call-caching.")
+    parser.add_argument('--no-cache', dest='no_cache', action='store_true', help="Disable call-caching, i.e. do not read from cache.")
     parser.add_argument('--no-ssl-verify', dest='no_ssl_verify', action='store_true', default=False,
         help="Disable SSL verification for web requests. Not recommended for general usage, but can be useful for intra-networks which don't support SSL verification."
     )
