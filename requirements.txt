@@ -1,0 +1,8 @@
+firecloud
+numpy
+pandas
+python-dateutil
+matplotlib
+six
+stratocumulus
+importlib_metadata>=0.7; python_version < '3.8'
