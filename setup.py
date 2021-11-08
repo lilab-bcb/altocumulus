@@ -1,32 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""The setup script."""
-
-import setuptools
+from setuptools import setup, find_packages
+from pathlib import Path
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-requirements = [
-    'firecloud',
-    'numpy',
-    'pandas',
-    'python-dateutil',
-    'matplotlib',
-    'six',
-    'stratocumulus',
-]
-
-setup_requirements = [
-        # put setup requirements (distutils extensions, etc.) here
-]
-
-test_requirements = [
-        'unittest'
-]
-
-setuptools.setup(
+setup(
     name='altocumulus',
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
@@ -36,13 +14,15 @@ setuptools.setup(
     url='https://github.com/lilab-bcb/altocumulus',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(include=['alto']),
+    packages=find_packages(include=['alto']),
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=[
+        l.strip() for l in Path("requirements.txt").read_text("utf-8").splitlines()
+    ],
     license="BSD license",
     zip_safe=False,
-    keywords='Terra',
-    classifiers=[
+    keywords=['Terra', 'Cromwell'],
+    classifiers=[  # https://pypi.python.org/pypi?%3Aaction=list_classifiers
             'License :: OSI Approved :: BSD License',
             'Intended Audience :: Developers',
             'Intended Audience :: Science/Research',
@@ -51,16 +31,8 @@ setuptools.setup(
             'Operating System :: Microsoft :: Windows',
             'Operating System :: POSIX :: Linux',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.5',
-            'Programming Language :: Python :: 3.6',
             'Topic :: Scientific/Engineering :: Bio-Informatics'
     ],
-    test_suite='tests',
-    tests_require=test_requirements,
     python_requires='>= 3',
-    entry_points={
-            'console_scripts': [
-                    'alto=alto.__main__:main'
-            ]
-    }
+    entry_points={'console_scripts': ['alto=alto.__main__:main']},
 )
