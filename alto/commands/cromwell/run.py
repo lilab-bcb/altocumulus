@@ -25,6 +25,7 @@ def wait_and_check(server, port, job_id, time_out, freq=60):
 
     time_out_seconds = time_out * 3600
     seconds_passed = 0
+    status = ""
 
     while seconds_passed < time_out_seconds:
         time.sleep(freq)
@@ -33,6 +34,7 @@ def wait_and_check(server, port, job_id, time_out, freq=60):
         resp_dict = resp.json()
         if resp.status_code == 200:
             if resp_dict['status'] in ['Succeeded', 'Failed', 'Aborted']:
+                status = resp_dict['status']
                 break
         else:
             print(resp_dict['message'])
@@ -40,6 +42,8 @@ def wait_and_check(server, port, job_id, time_out, freq=60):
 
     if seconds_passed >= time_out_seconds:
         print(f"{time_out}-hour time-out is reached!")
+
+    return status
 
 
 def parse_workflow_str(method_str, no_ssl_verify):
@@ -115,14 +119,13 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
     if resp.status_code == 201:
         if time_out is None:
             print(f"Job {resp_dict['id']} is in status {resp_dict['status']}.")
-        else:
-            print(f"{{\"job_id\": \"{resp_dict['id']}\"}}")
     else:
         print(resp_dict['message'])
 
     # Enter the monitor mode
     if time_out is not None:
-        wait_and_check(server, port, resp_dict['id'], time_out)
+        status = wait_and_check(server, port, resp_dict['id'], time_out)
+        print(f"{{\"job_id\": \"{resp_dict['id']}\", \"status\": \"{status}\"}}")
 
 
 def main(argv):
