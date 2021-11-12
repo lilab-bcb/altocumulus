@@ -1,6 +1,7 @@
 import argparse, json, requests
 
 from alto.utils import run_command
+from subprocess import CalledProcessError
 
 
 def get_localize_path(cloud_uri, job_id):
@@ -18,8 +19,8 @@ def get_remote_log_file(cloud_uri, job_id):
     backend, local_path = get_localize_path(cloud_uri, job_id)
     try:
         run_command(['strato', 'cp', '--backend', backend, cloud_uri, local_path], dry_run=False)
-    except:
-        return
+    except CalledProcessError:
+        print(f"{cloud_uri} does not exist.")
 
 def get_logs_per_task(server, port, job_id, meta_dict):
     # For tasks with no subworkflow ID
