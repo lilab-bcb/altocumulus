@@ -1,12 +1,18 @@
-import subprocess
+import sys, subprocess
 from typing import List
 
 def run_command(command: List[str], dry_run: bool) -> None:
     """ Print command and execute it (if dry_run == False).
     """
-    print(' '.join(command))
-    if not dry_run:
-        subprocess.check_call(command)
+    old_stdout = sys.stdout
+    sys.stdout = sys.stderr
+
+    try:
+        print(' '.join(command))
+        if not dry_run:
+            subprocess.check_call(command)
+    finally:
+        sys.stdout = old_stdout
 
 from .io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from .dockstore_utils import parse_dockstore_workflow, get_dockstore_workflow
