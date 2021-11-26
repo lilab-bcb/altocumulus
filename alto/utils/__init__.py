@@ -1,4 +1,4 @@
-import sys, subprocess
+import subprocess
 from typing import List
 
 def run_command(
