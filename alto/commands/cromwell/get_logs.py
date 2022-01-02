@@ -23,23 +23,27 @@ def get_remote_log_file(cloud_uri, job_id):
         print(f"{cloud_uri} does not exist.")
 
 
-def get_logs_per_task(server, port, job_id, meta_dict):
-    # For tasks with no subworkflow ID
-    resp_top = requests.get(f"http://{server}:{port}/api/workflows/v1/{job_id}/logs")
-    resp_top_dict = resp_top.json()
-
-    # Create log folder even if there will be no log file.
-    run_command(['mkdir', '-p', job_id], dry_run=False)
+def get_logs(server, port, top_job_id, cur_job_id):
+    # For tasks directly called by current job
+    resp_logs = requests.get(f"http://{server}:{port}/api/workflows/v1/{cur_job_id}/logs")
+    logs_dict = resp_logs.json()
+    if resp_logs.status_code != 200:
+        raise Exception(logs_dict['message'])
 
     processed_tasks = set()
-    if 'calls' in resp_top_dict.keys():
-        for task_name, log_list in resp_top_dict['calls'].items():
+    if 'calls' in logs_dict.keys():
+        for task_name, log_list in logs_dict['calls'].items():
             for log in log_list:
-                get_remote_log_file(log['stderr'], job_id)
-                get_remote_log_file(log['stdout'], job_id)
+                get_remote_log_file(log['stderr'], top_job_id)
+                get_remote_log_file(log['stdout'], top_job_id)
             processed_tasks.add(task_name)
-    else:
-        print("No call log for this job.")
+    #else:
+    #    print("No call log for this job.")
+
+    resp_meta = requests.get(f"http://{server}:{port}/api/workflows/v1/{cur_job_id}/metadata")
+    meta_dict = resp_meta.json()
+    if resp_meta.status_code != 200:
+        raise Exception(meta_dict['message'])
 
     # For tasks with subworkflow ID
     if 'calls' in meta_dict.keys():
@@ -47,24 +51,9 @@ def get_logs_per_task(server, port, job_id, meta_dict):
             if task_name not in processed_tasks:
                 for task in task_list:
                     subworkflow_id = task['subWorkflowId']
-                    resp_task = requests.get(f"http://{server}:{port}/api/workflows/v1/{subworkflow_id}/logs")
-                    resp_task_dict = resp_task.json()
-                    for task_name, log_list in resp_task_dict['calls'].items():
-                        for log in log_list:
-                            get_remote_log_file(log['stderr'], job_id)
-                            get_remote_log_file(log['stdout'], job_id)
-    else:
-        print("No call log for subworkflows of this job.")
-
-
-def get_logs(server, port, job_id):
-    resp_meta = requests.get(f"http://{server}:{port}/api/workflows/v1/{job_id}/metadata")
-    meta_dict = resp_meta.json()
-
-    if resp_meta.status_code == 200:
-        get_logs_per_task(server, port, job_id, meta_dict)
-    else:
-        print(meta_dict['message'])
+                    get_logs(server, port, top_job_id, subworkflow_id)
+    #else:
+    #    print("No call log for subworkflows of this job.")
 
 
 def main(argv):
@@ -82,4 +71,8 @@ def main(argv):
     )
 
     args = parser.parse_args(argv)
-    get_logs(args.server, args.port, args.job_id)
+
+    # Create log folder even if there is no log file.
+    run_command(['mkdir', '-p', args.job_id], dry_run=False)
+
+    get_logs(args.server, args.port, args.job_id, args.job_id)
