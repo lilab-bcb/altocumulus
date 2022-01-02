@@ -82,7 +82,7 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
     # Upload input data to cloud bucket if needed.
     if out_json is not None:
         backend, bucket_id, bucket_folder = parse_bucket_folder_url(bucket)
-        upload_to_cloud_bucket(inputs, backend, bucket_id, bucket_folder, out_json, False)
+        upload_to_cloud_bucket(inputs, backend, bucket_id, bucket_folder, out_json, dry_run=False, verbose=True if time_out is None else False)
 
     files['workflowInputs'] = open(wf_input_path if out_json is None else out_json, 'rb')
 
