@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 from dateutil import parser
 import time
+from typing import List
 
 
 def datetime_from_utc_to_local(utc_datetime: str) -> str:
@@ -55,18 +56,19 @@ def show_jobs(df: pd.DataFrame):
 
 
 def list_jobs(
-    server: str, port: int, is_all: bool, username: str, job_id: str, job_status: str
+    server: str,
+    port: int,
+    is_all: bool,
+    username: str,
+    job_statuses: List[str],
 ):
     query_data = []
     query_data.append({"additionalQueryResultFields": "labels"})
     if not is_all:
-        if job_id is not None:
-            query_data.append({"id": job_id})
-        else:
-            query_data.append({"additionalQueryResultFields": "labels"})
-            query_data.append({"label": f"creator:{username}"})
+        query_data.append({"additionalQueryResultFields": "labels"})
+        query_data.append({"label": f"creator:{username}"})
 
-    if job_status is not None:
+    for job_status in job_statuses:
         query_data.append({"status": job_status})
     resp = requests.post(
         f"http://{server}:{port}/api/workflows/v1/query",
@@ -124,12 +126,6 @@ def main(argv):
         help="List jobs submitted by this user.",
     )
     parser.add_argument(
-        "--id",
-        dest="job_id",
-        action="store",
-        help="List all the subtasks of the specified job.",
-    )
-    parser.add_argument(
         "--only-succeeded",
         dest="only_succeeded",
         action="store_true",
@@ -148,17 +144,18 @@ def main(argv):
         dest="only_failed",
         action="store_true",
         default=False,
-        help="Only show jobs that have failed.",
+        help="Only show jobs that have failed or have aborted.",
     )
 
     args = parser.parse_args(argv)
 
-    job_status = None
+    job_statuses = []
     if args.only_succeeded:
-        job_status = "Succeeded"
+        job_statuses.append("Succeeded")
     elif args.only_failed:
-        job_status = "Failed"
+        job_statuses.append("Failed")
+        job_statuses.append("Aborted")
     elif args.only_running:
-        job_status = "Running"
+        job_statuses.append("Running")
 
-    list_jobs(args.server, args.port, args.is_all, args.user, args.job_id, job_status)
+    list_jobs(args.server, args.port, args.is_all, args.user, job_statuses)
