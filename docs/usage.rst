@@ -108,31 +108,6 @@ to see the usage information::
                                     Method takes the format of namespace/name/version. If only namespace is provided, delete all methods under that namespace. If both namespace and name are provided, delete all
                                     snapshots for that method. If namespace, name and version are provided, only delete the specific snapshot.
 
-- ``terra remove_method``
-
-``alto terra remove_method``
---------------------------------------------------------------------------------------------------------------------------------
-
-Remove methods from Broad Methods Repository.
-
-
-Type::
-
-    alto terra remove_method -h
-
-to see the usage information::
-
-    Usage:
-        alto terra remove_method [-h] -n NAMESPACE [-p] wdl [wdl ...]
-
-* Arguments:
-
-        optional arguments:
-            -h, --help            show this help message and exit
-            -m METHOD, --method METHOD
-                    Method takes the format of namespace/name/version. If only namespace is provided, delete all methods under that namespace. If both namespace and name are provided, delete all
-                    snapshots for that method. If namespace, name and version are provided, only delete the specific snapshot.
-
 - ``terra storage_estimate``
 
 ``alto terra storage_estimate``
