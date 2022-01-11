@@ -83,7 +83,6 @@ to see the usage information::
                                     Methods namespace
             -p, --public          Make methods publicly readable
 
-- ``terra remove_method``
 
 ``alto terra remove_method``
 --------------------------------------------------------------------------------------------------------------------------------
@@ -108,7 +107,6 @@ to see the usage information::
                                     Method takes the format of namespace/name/version. If only namespace is provided, delete all methods under that namespace. If both namespace and name are provided, delete all
                                     snapshots for that method. If namespace, name and version are provided, only delete the specific snapshot.
 
-- ``terra storage_estimate``
 
 ``alto terra storage_estimate``
 --------------------------------------------------------------------------------------------------------------------------------
@@ -136,7 +134,6 @@ to see the usage information::
 Cromwell commands
 =====================================
 
-- ``cromwell run``
 
 ``alto cromwell run``
 --------------------------------------------------------------------------------------------------------------------------------
@@ -176,7 +173,6 @@ to see the usage information::
             --no-ssl-verify       Disable SSL verification for web requests. Not recommended for general usage, but can be useful for intra-networks which don't support SSL verification.
             --time-out TIME_OUT   Keep on checking the job's status until time_out (in hours) is reached. Notice that if this option is set, Altocumulus won't terminate until reaching time_out.
 
-- ``cromwell check_status``
 
 ``alto cromwell check_status``
 --------------------------------------------------------------------------------------------------------------------------------
@@ -203,8 +199,6 @@ to see the usage information::
 
 
 
-- ``cromwell abort``
-
 ``alto cromwell abort``
 --------------------------------------------------------------------------------------------------------------------------------
 
@@ -230,8 +224,6 @@ to see the usage information::
 
 
 
-- ``cromwell get_metadata``
-
 ``alto cromwell get_metadata``
 --------------------------------------------------------------------------------------------------------------------------------
 
@@ -255,8 +247,6 @@ to see the usage information::
             -p PORT, --port PORT  Port number for Cromwell service. The default port is 8000.
             --id JOB_ID           Workflow ID returned in 'alto cromwell run' command.
 
-
-- ``cromwell get_logs``
 
 ``alto cromwell get_logs``
 --------------------------------------------------------------------------------------------------------------------------------
@@ -282,8 +272,6 @@ to see the usage information::
             --id JOB_ID           Workflow ID returned in 'alto cromwell run' command.
 
 
-
-- ``cromwell list_jobs``
 
 ``alto cromwell list_jobs``
 --------------------------------------------------------------------------------------------------------------------------------
@@ -315,8 +303,6 @@ to see the usage information::
 
 Upload to cloud
 ================
-
-- ``upload``
 
 ``alto upload``
 --------------------------------------------------------------------------------------------------------------------------------
@@ -351,8 +337,6 @@ to see the usage information::
 
 Logs
 =====
-
-- ``parse_monitoring_log``
 
 ``alto parse_monitoring_log``
 --------------------------------------------------------------------------------------------------------------------------------
