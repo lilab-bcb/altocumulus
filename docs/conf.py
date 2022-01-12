@@ -22,7 +22,7 @@ sys.path.insert(0, str(HERE.parent))
 
 # -- Project information -----------------------------------------------------
 
-project = "PegasusIO"
+project = "Altocumulus"
 copyright = "2021 The Broad Institute, Inc. and The General Hospital Corporation. All rights reserved."
 author = (
     "Bo Li, Yiming Yang, Rimte Rocher"

@@ -13,36 +13,15 @@ Altocumulus
 .. |Docs| image:: https://readthedocs.org/projects/altocumulus/badge/?version=latest
    :target: https://altocumulus.readthedocs.io
 
-Command line utilities for running workflows on `Terra <https://app.terra.bio/>`_ or `Cromwell <https://github.com/broadinstitute/cromwell>`_ including:
+Command line utilities for running workflows on `Terra <https://app.terra.bio>`_ or `Cromwell <https://cromwell.readthedocs.io>`_ including:
 
-- Run a Terra method. Replace local file paths with workspace Google Cloud bucket URLs. Automatically upload referenced files to workspace Google bucket.
-- Bulk add/delete methods in Terra.
+- Run a Terra method, and bulk add/delete methods on Terra.
+- Submit WDL workflow jobs to a sever running Cromwell, as well as check jobs' status, abort jobs, and get logs.
+- Replace local file paths with remote Cloud (Google Cloud or Amazon AWS) bucket URIs, and automatically upload referenced files to Cloud buckets.
 - Parse monitoring log files to determine optimal instance type and disk space.
 
-Re: useful links:
+Important tools used by Altocumulus:
 
-`FireCloud Swagger <https://api.firecloud.org/>`_
-
-`Dockstore Swagger <https://dockstore.org/api/static/swagger-ui/index.html>`_
-
-`fiss <https://github.com/broadinstitute/fiss>`_ In particular, look at the api.py
-
-Installation
-+++++++++++++++
-
-Use the commands below to install Altocumulus from repo::
-
-    git clone https://github.com/lilab-bcb/altocumulus.git
-    cd altocumulus
-    pip install -e .
-
-Usage
-++++++++
-
-Type ``alto`` for a list of all commands.
-
-
-Legacy Release
-+++++++++++++++++
-
-Version `1.1.1 <https://github.com/klarman-cell-observatory/altocumulus>`_, making sure that float values would look the same as in json input. For example, if 0.00005 is given, altocumulus will pass '0.00005' instead of '5e-05' to Terra.
+- `FireCloud Swagger <https://api.firecloud.org/>`_
+- `Dockstore Swagger <https://dockstore.org/api/static/swagger-ui/index.html>`_
+- `FireCloud Service Selector <https://github.com/broadinstitute/fiss>`_ (FISS). In particular, `fiss/firecloud/api.py <https://github.com/broadinstitute/fiss/blob/master/firecloud/api.py>`_.
