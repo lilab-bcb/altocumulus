@@ -13,7 +13,6 @@ setup(
     author_email='cumulus@broadinstitute.org',
     url='https://github.com/lilab-bcb/altocumulus',
     long_description=long_description,
-    long_description_content_type="text/markdown",
     packages=find_packages(include=['alto']),
     include_package_data=True,
     install_requires=[
