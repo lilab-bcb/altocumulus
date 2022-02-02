@@ -1,3 +1,4 @@
+from typing import Optional
 import os
 import json
 import numpy as np
@@ -61,7 +62,7 @@ class cloud_url_factory: # class to make sure all cloud urls are unique
         return uniq_url
 
 
-def transfer_data(source: str, dest: str, backend: str, dry_run: bool, flowcells: Dict[str, lane_manager] = None, verbose: bool = True) -> None:
+def transfer_data(source: str, dest: str, backend: str, dry_run: bool, flowcells: Dict[str, lane_manager] = None, verbose: bool = True, profile: Optional[str] = None) -> None:
     """Transfer source to dest (cloud destination).
        backend, choosing from gcp and aws.
        flowcells is a global flowcell manangement object.
@@ -74,9 +75,13 @@ def transfer_data(source: str, dest: str, backend: str, dry_run: bool, flowcells
         transfer_flowcell(source, dest, backend, lanes, dry_run)
     else:
         if os.path.isdir(source):
-            run_command(['strato', 'sync', '--backend', backend, '--ionice', '-m', source, dest], dry_run, suppress_stdout=not verbose)
+            strato_cmds = ['strato', 'sync', '--backend', backend, '--ionice', '-m', source, dest]
         else:
-            run_command(['strato', 'cp', '--backend', backend, '--ionice', source, dest], dry_run, suppress_stdout=not verbose)
+            strato_cmds = ['strato', 'cp', '--backend', backend, '--ionice', source, dest]
+
+        if profile:
+            strato_cmds.extend(["--profile", profile])
+        run_command(strato_cmds, dry_run, suppress_stdout=not verbose)
 
 
 def transfer_sample_sheet(input_file: str, backend: str, input_file_to_output_url: dict, url_gen: cloud_url_factory, dry_run: bool, verbose: bool=True) -> Tuple[str, bool]:
@@ -138,6 +143,7 @@ def upload_to_cloud_bucket(
     out_json: str,
     dry_run: bool,
     verbose: bool = True,
+    profile: Optional[str] = None
 ) -> None:
     """Check and upload local files to the cloud bucket.
 
@@ -187,7 +193,7 @@ def upload_to_cloud_bucket(
                 # look inside input file to see if there are file paths within
                 input_path, is_changed = transfer_sample_sheet(input_path, backend, input_file_to_output_url, url_gen, dry_run, verbose)
 
-            transfer_data(input_path, input_url, backend, dry_run, verbose=verbose)
+            transfer_data(input_path, input_url, backend, dry_run, verbose=verbose, profile=profile)
             inputs[k] = input_url
             if is_changed: # delete temporary file after uploading
                 os.remove(input_path)
