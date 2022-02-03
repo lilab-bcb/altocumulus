@@ -62,7 +62,15 @@ class cloud_url_factory: # class to make sure all cloud urls are unique
         return uniq_url
 
 
-def transfer_data(source: str, dest: str, backend: str, dry_run: bool, flowcells: Dict[str, lane_manager] = None, verbose: bool = True, profile: Optional[str] = None) -> None:
+def transfer_data(
+    source: str,
+    dest: str,
+    backend: str,
+    dry_run: bool,
+    flowcells: Dict[str, lane_manager] = None,
+    verbose: bool = True,
+    profile: Optional[str] = None,
+) -> None:
     """Transfer source to dest (cloud destination).
        backend, choosing from gcp and aws.
        flowcells is a global flowcell manangement object.
@@ -72,19 +80,34 @@ def transfer_data(source: str, dest: str, backend: str, dry_run: bool, flowcells
 
     if path_is_flowcell(source):
         lanes = flowcells[source].get_lanes() if flowcells is not None else ['*']
-        transfer_flowcell(source, dest, backend, lanes, dry_run)
+        transfer_flowcell(
+            source=source,
+            dest=dest,
+            backend=backend,
+            lanes=lanes,
+            dry_run=dry_run,
+            profile=profile,
+        )
     else:
         if os.path.isdir(source):
-            strato_cmds = ['strato', 'sync', '--backend', backend, '--ionice', '-m', source, dest]
+            strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', source, dest]
         else:
-            strato_cmds = ['strato', 'cp', '--backend', backend, '--ionice', source, dest]
+            strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', source, dest]
 
-        if profile:
-            strato_cmds.extend(["--profile", profile])
-        run_command(strato_cmds, dry_run, suppress_stdout=not verbose)
+        if profile is not None:
+            strato_cmd.extend(["--profile", profile])
+        run_command(strato_cmd, dry_run, suppress_stdout=not verbose)
 
 
-def transfer_sample_sheet(input_file: str, backend: str, input_file_to_output_url: dict, url_gen: cloud_url_factory, dry_run: bool, verbose: bool=True) -> Tuple[str, bool]:
+def transfer_sample_sheet(
+    input_file: str,
+    backend: str,
+    input_file_to_output_url: dict,
+    url_gen: cloud_url_factory,
+    dry_run: bool,
+    verbose: bool = True,
+    profile: Optional[str] = None,
+) -> Tuple[str, bool]:
     """Check sample sheet and upload files inside it.
        input_file: sample sheet
        backend: choosing from 'gcp' and 'aws'
@@ -92,6 +115,7 @@ def transfer_sample_sheet(input_file: str, backend: str, input_file_to_output_ur
        url_gen: cloud url factory to make sure no duplicated cloud urls
        dry_run: if dry run
        verbose: if print info
+       profile: if not None, use for AWS backend.
 
        Returns: path to updated input file (if changed) and if sample sheet is changed
     """
@@ -117,7 +141,15 @@ def transfer_sample_sheet(input_file: str, backend: str, input_file_to_output_ur
                 sub_url = input_file_to_output_url.get(value, None)
                 if sub_url is None:
                     sub_url = url_gen.get_unique_url(value)
-                    transfer_data(value, sub_url, backend, dry_run, flowcells=flowcells, verbose=verbose)
+                    transfer_data(
+                        source=value,
+                        dest=sub_url,
+                        backend=backend,
+                        dry_run=dry_run,
+                        flowcells=flowcells,
+                        verbose=verbose,
+                        profile=profile,
+                    )
                     input_file_to_output_url[value] = sub_url
                 row[idxc] = sub_url
                 is_changed = True
@@ -143,7 +175,7 @@ def upload_to_cloud_bucket(
     out_json: str,
     dry_run: bool,
     verbose: bool = True,
-    profile: Optional[str] = None
+    profile: Optional[str] = None,
 ) -> None:
     """Check and upload local files to the cloud bucket.
 
@@ -191,9 +223,24 @@ def upload_to_cloud_bucket(
 
             if input_path_extension in search_inside_file_whitelist:
                 # look inside input file to see if there are file paths within
-                input_path, is_changed = transfer_sample_sheet(input_path, backend, input_file_to_output_url, url_gen, dry_run, verbose)
+                input_path, is_changed = transfer_sample_sheet(
+                    input_file=input_path,
+                    backend=backend,
+                    input_file_to_output_url=input_file_to_output_url,
+                    url_gen=url_gen,
+                    dry_run=dry_run,
+                    verbose=verbose,
+                    profile=profile,
+                )
 
-            transfer_data(input_path, input_url, backend, dry_run, verbose=verbose, profile=profile)
+            transfer_data(
+                source=input_path,
+                dest=input_url,
+                backend=backend,
+                dry_run=dry_run,
+                verbose=verbose,
+                profile=profile,
+            )
             inputs[k] = input_url
             if is_changed: # delete temporary file after uploading
                 os.remove(input_path)
