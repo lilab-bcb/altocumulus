@@ -82,8 +82,16 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
     # Upload input data to cloud bucket if needed.
     if out_json is not None:
         backend, bucket_id, bucket_folder = parse_bucket_folder_url(bucket)
-        verbose=True if time_out is None else False
-        upload_to_cloud_bucket(inputs, backend, bucket_id, bucket_folder, out_json, dry_run=False, verbose=verbose, profile=profile)
+        upload_to_cloud_bucket(
+            inputs=inputs,
+            backend=backend,
+            bucket=bucket_id,
+            bucket_folder=bucket_folder,
+            out_json=out_json,
+            dry_run=False,
+            verbose=True if time_out is None else False,
+            profile=profile,
+        )
 
     files['workflowInputs'] = open(wf_input_path if out_json is None else out_json, 'rb')
 
@@ -166,7 +174,7 @@ def main(argv):
         help="Keep on checking the job's status until time_out (in hours) is reached. Notice that if this option is set, Altocumulus won't terminate until reaching time_out."
     )
     parser.add_argument('--profile', dest='profile', type=str,
-        help="AWS profile (if running on aws)"
+        help="AWS profile. Only works if dealing with AWS, and if not set, use the default profile."
     )
 
     args = parser.parse_args(argv)
