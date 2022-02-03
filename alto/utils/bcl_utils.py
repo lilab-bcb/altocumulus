@@ -71,22 +71,22 @@ def transfer_flowcell(
     --------
     >>> transfer_flowcell('flowcell', 'gs://my_bucket/flowcell', 'gcp', ['*'], False)
     """
-    strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', f'{source}/RunInfo.xml', f'{dest}/RunInfo.xml']
+    strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', '--quiet', f'{source}/RunInfo.xml', f'{dest}/RunInfo.xml']
     if profile is not None:
         strato_cmd.extend(['--profile', profile])
     run_command(strato_cmd, dry_run, suppress_stdout=not verbose)
 
     if not os.path.exists(f'{source}/RTAComplete.txt'):
         raise FileNotFoundError("Cannot find RTAComplete.txt. Please check if sequencing is completed!")
-    strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', f'{source}/RTAComplete.txt', f'{dest}/RTAComplete.txt']
+    strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', '--quiet', f'{source}/RTAComplete.txt', f'{dest}/RTAComplete.txt']
     if profile is not None:
         strato_cmd.extend(['--profile', profile])
     run_command(strato_cmd, dry_run, suppress_stdout=not verbose)
 
     if os.path.exists(f'{source}/runParameters.xml'):
-        strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', f'{source}/runParameters.xml', f'{dest}/runParameters.xml']
+        strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', '--quiet', f'{source}/runParameters.xml', f'{dest}/runParameters.xml']
     elif os.path.exists(f'{source}/RunParameters.xml'):
-        strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', f'{source}/RunParameters.xml', f'{dest}/RunParameters.xml']
+        strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', '--quiet', f'{source}/RunParameters.xml', f'{dest}/RunParameters.xml']
     else:
         raise FileNotFoundError("Cannot find either runParameters.xml or RunParameters.xml!")
     if profile is not None:
@@ -104,7 +104,7 @@ def transfer_flowcell(
     # copy bcl files
     for lane in lanes:
         lane_string = basecall_string + '/{1}'
-        strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', lane_string.format(source, lane), lane_string.format(dest, lane)]
+        strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', '--quiet', lane_string.format(source, lane), lane_string.format(dest, lane)]
         if profile is not None:
             strato_cmd.extend(['--profile', profile])
         run_command(strato_cmd, dry_run, suppress_stdout=not verbose)
@@ -112,14 +112,14 @@ def transfer_flowcell(
     # copy locs files
     locs_string = '{0}/Data/Intensities/s.locs'
     if os.path.exists(locs_string.format(source)):
-        strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', locs_string.format(source), locs_string.format(dest)]
+        strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', '--quiet', locs_string.format(source), locs_string.format(dest)]
         if profile is not None:
             strato_cmd.extend(['--profile', profile])
         run_command(strato_cmd, dry_run, suppress_stdout=not verbose)
     else:
         locs_string = '{0}/Data/Intensities/{1}'
         for lane in lanes:
-            strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', locs_string.format(source, lane), locs_string.format(dest, lane)]
+            strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', '--quiet', locs_string.format(source, lane), locs_string.format(dest, lane)]
             if profile is not None:
                 strato_cmd.extend(['--profile', profile])
             run_command(strato_cmd, dry_run, suppress_stdout=not verbose)
