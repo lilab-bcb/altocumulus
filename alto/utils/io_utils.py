@@ -90,9 +90,9 @@ def transfer_data(
         )
     else:
         if os.path.isdir(source):
-            strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', source, dest]
+            strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', '--quiet', source, dest]
         else:
-            strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', source, dest]
+            strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', '--quiet', source, dest]
 
         if profile is not None:
             strato_cmd.extend(["--profile", profile])
