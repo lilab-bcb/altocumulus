@@ -15,15 +15,18 @@ def get_localize_path(cloud_uri, job_id):
     return backend, local_path
 
 
-def get_remote_log_file(cloud_uri, job_id):
+def get_remote_log_file(cloud_uri, job_id, profile):
     backend, local_path = get_localize_path(cloud_uri, job_id)
     try:
-        run_command(['strato', 'cp', '--backend', backend, cloud_uri, local_path], dry_run=False)
+        strato_cmd = ['strato', 'cp', '--backend', backend, cloud_uri, local_path]
+        if profile is not None:
+            strato_cmd.extend(['--profile', profile])
+        run_command(strato_cmd, dry_run=False)
     except CalledProcessError:
         print(f"{cloud_uri} does not exist.")
 
 
-def get_logs(server, port, top_job_id, cur_job_id):
+def get_logs(server, port, top_job_id, cur_job_id, profile):
     # For tasks directly called by current job
     resp_logs = requests.get(f"http://{server}:{port}/api/workflows/v1/{cur_job_id}/logs")
     logs_dict = resp_logs.json()
@@ -34,8 +37,8 @@ def get_logs(server, port, top_job_id, cur_job_id):
     if 'calls' in logs_dict.keys():
         for task_name, log_list in logs_dict['calls'].items():
             for log in log_list:
-                get_remote_log_file(log['stderr'], top_job_id)
-                get_remote_log_file(log['stdout'], top_job_id)
+                get_remote_log_file(log['stderr'], top_job_id, profile)
+                get_remote_log_file(log['stdout'], top_job_id, profile)
             processed_tasks.add(task_name)
     #else:
     #    print("No call log for this job.")
@@ -51,7 +54,7 @@ def get_logs(server, port, top_job_id, cur_job_id):
             if task_name not in processed_tasks:
                 for task in task_list:
                     subworkflow_id = task['subWorkflowId']
-                    get_logs(server, port, top_job_id, subworkflow_id)
+                    get_logs(server, port, top_job_id, subworkflow_id, profile)
     #else:
     #    print("No call log for subworkflows of this job.")
 
@@ -69,10 +72,13 @@ def main(argv):
     parser.add_argument('--id', dest='job_id', action='store', required=True,
         help="Workflow ID returned in 'alto cromwell run' command."
     )
+    parser.add_argument('--profile', dest='profile', type=str,
+        help="AWS profile. Only works if dealing with AWS, and if not set, use the default profile."
+    )
 
     args = parser.parse_args(argv)
 
     # Create log folder even if there is no log file.
     run_command(['mkdir', '-p', args.job_id], dry_run=False)
 
-    get_logs(args.server, args.port, args.job_id, args.job_id)
+    get_logs(args.server, args.port, args.job_id, args.job_id, args.profile)

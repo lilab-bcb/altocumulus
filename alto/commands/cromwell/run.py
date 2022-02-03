@@ -64,7 +64,7 @@ def parse_workflow_str(method_str, no_ssl_verify):
     return workflow_str, is_url
 
 
-def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify, time_out):
+def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify, time_out, profile):
     files = dict()
     data = dict()
     label_dict = dict()
@@ -82,7 +82,16 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
     # Upload input data to cloud bucket if needed.
     if out_json is not None:
         backend, bucket_id, bucket_folder = parse_bucket_folder_url(bucket)
-        upload_to_cloud_bucket(inputs, backend, bucket_id, bucket_folder, out_json, dry_run=False, verbose=True if time_out is None else False)
+        upload_to_cloud_bucket(
+            inputs=inputs,
+            backend=backend,
+            bucket=bucket_id,
+            bucket_folder=bucket_folder,
+            out_json=out_json,
+            dry_run=False,
+            verbose=True if time_out is None else False,
+            profile=profile,
+        )
 
     files['workflowInputs'] = open(wf_input_path if out_json is None else out_json, 'rb')
 
@@ -164,7 +173,10 @@ def main(argv):
     parser.add_argument('--time-out', dest='time_out', type=float,
         help="Keep on checking the job's status until time_out (in hours) is reached. Notice that if this option is set, Altocumulus won't terminate until reaching time_out."
     )
+    parser.add_argument('--profile', dest='profile', type=str,
+        help="AWS profile. Only works if dealing with AWS, and if not set, use the default profile."
+    )
 
     args = parser.parse_args(argv)
 
-    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_cache, args.no_ssl_verify, args.time_out)
+    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_cache, args.no_ssl_verify, args.time_out, args.profile)
