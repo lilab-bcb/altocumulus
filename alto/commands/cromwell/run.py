@@ -83,7 +83,7 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
     # Process workflow WDL's dependency
     if dependency_str is not None:
         if check_zip(dependency_str):
-            files['workflowDependencies'] = dependency_str
+            files['workflowDependencies'] = open(dependency_str, 'rb')
         else:
             sys.exit('Dependency zip file does not exist or is not given in zip format.')
 
