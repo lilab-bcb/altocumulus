@@ -1,7 +1,6 @@
-import argparse, getpass, json, os, requests, time
+import argparse, getpass, json, os, requests, time, zipfile
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
-
 
 wf_label_filename = ".workflow_labels.json"
 wf_option_filename = ".workflow_options.json"
@@ -63,8 +62,13 @@ def parse_workflow_str(method_str, no_ssl_verify):
 
     return workflow_str, is_url
 
+def check_zip(dependency_str):
+    is_dependency = False
+    if os.path.isfile(dependency_str) and zipfile.is_zipfile(dependency_str): 
+        is_dependency = True
+    return is_dependency   
 
-def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify, time_out, profile):
+def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify, time_out, profile, dependency_str):
     files = dict()
     data = dict()
     label_dict = dict()
@@ -75,6 +79,13 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
         data['workflowUrl'] = workflow_str
     else:
         files['workflowSource'] = open(workflow_str, 'rb')
+
+    # Process workflow WDL's dependency
+    if dependency_str is not None:
+        if check_zip(dependency_str):
+            files['workflowDependencies'] = open(dependency_str, 'rb')
+        else:
+            raise Exception('Dependency zip file does not exist or is not given in zip format.')
 
     # Process job's workflow inputs
     inputs = read_wdl_inputs(wf_input_path)
@@ -157,6 +168,11 @@ def main(argv):
               (2) An HTTP or HTTPS URL of a WDL file. \
               (3) A local path to a WDL file."
     )
+    parser.add_argument('-d', '--dependency', dest='dependency_str', action='store', 
+        help="ZIP file containing workflow source files that are used \
+              to resolve local imports. This zip bundle will be unpacked \
+              in a sandbox accessible to the workflow."
+    )    
     parser.add_argument('-i', '--input', dest='input', action='store', required=True,
         help="Path to a local JSON file specifying workflow inputs."
     )
@@ -179,4 +195,4 @@ def main(argv):
 
     args = parser.parse_args(argv)
 
-    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_cache, args.no_ssl_verify, args.time_out, args.profile)
+    submit_to_cromwell(args.server, args.port, args.method_str, args.input, args.out_json, args.bucket, args.no_cache, args.no_ssl_verify, args.time_out, args.profile, args.dependency_str)
