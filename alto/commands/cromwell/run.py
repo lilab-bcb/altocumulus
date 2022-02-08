@@ -1,4 +1,4 @@
-import argparse, getpass, json, os, requests, time, sys, zipfile
+import argparse, getpass, json, os, requests, time, zipfile
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
 
@@ -85,7 +85,7 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
         if check_zip(dependency_str):
             files['workflowDependencies'] = open(dependency_str, 'rb')
         else:
-            sys.exit('Dependency zip file does not exist or is not given in zip format.')
+            raise Exception('Dependency zip file does not exist or is not given in zip format.')
 
     # Process job's workflow inputs
     inputs = read_wdl_inputs(wf_input_path)
