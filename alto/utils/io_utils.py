@@ -1,5 +1,6 @@
 from typing import Optional
 import os
+import re
 import json
 import numpy as np
 import pandas as pd
@@ -7,7 +8,7 @@ import tempfile
 from collections import defaultdict
 from typing import Tuple, Dict
 
-from alto.utils import run_command
+from alto.utils import prefix_float, run_command
 from .bcl_utils import lane_manager, path_is_flowcell, transfer_flowcell
 
 
@@ -29,7 +30,7 @@ def read_wdl_inputs(input_json: str) -> dict:
     --------
     >>> wdl_inputs = read_wdl_inputs('inputs.json')
     """
-    float_parser = lambda x: (float(x), x)
+    float_parser = lambda x: prefix_float + x
 
     assert isinstance(input_json, str)
 
@@ -247,4 +248,5 @@ def upload_to_cloud_bucket(
 
     if out_json is not None:
         with open(out_json, 'w') as fout:
-            json.dump(inputs, fout, indent=4)
+            res_str = json.dumps(inputs, indent=4)
+            fout.write(re.sub(f'"{prefix_float}(.+)"', r'\1', res_str))
