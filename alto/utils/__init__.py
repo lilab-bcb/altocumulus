@@ -1,6 +1,9 @@
 import subprocess
 from typing import List
 
+
+prefix_float = "_&@&_"
+
 def run_command(
     command: List[str],
     dry_run: bool,
