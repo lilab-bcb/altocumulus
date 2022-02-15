@@ -10,7 +10,7 @@ setup(
     setup_requires=['setuptools_scm'],
     description="Command line utilities for running workflows",
     author="Cumulus Team",
-    author_email='cumulus@broadinstitute.org',
+    author_email="cumulus-support@googlegroups.com",
     url='https://github.com/lilab-bcb/altocumulus',
     long_description=long_description,
     packages=find_packages(include=['alto']),
