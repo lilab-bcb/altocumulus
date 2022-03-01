@@ -18,6 +18,7 @@ def main(argv):
     parser.add_argument('--dry-run', dest='dry_run', action='store_true',
                         help='Causes upload to run in "dry run" mode, i.e., just outputting what would be uploaded without actually doing any uploading.')
     parser.add_argument('-o', dest='out_json', action='store', metavar='<updated_json>', help='Output updated input JSON file to <updated_json>')
+    parser.add_argument('--profile', dest='profile', action='store', help='AWS profile. Only works if dealing with AWS S3 buckets, and if not set, use the default profile.')
     parser.add_argument(dest='input', help='Input JSONs or files (e.g. sample sheet).', nargs='+')
 
 
@@ -45,4 +46,4 @@ def main(argv):
             import uuid
             inputs.update({str(uuid.uuid1()): path})
 
-    upload_to_cloud_bucket(inputs, backend, bucket, args.bucket_folder, args.out_json, args.dry_run)
+    upload_to_cloud_bucket(inputs, backend, bucket, args.bucket_folder, args.out_json, args.dry_run, args.profile)
