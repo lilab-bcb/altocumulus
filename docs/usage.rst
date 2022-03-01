@@ -192,6 +192,8 @@ to see the usage information::
         * An HTTP or HTTPS URL of a WDL file.
 
         * A local path to a WDL file.
+    -d DEPENDENCY_STR, -\-dependency DEPENDENCY_STR
+        ZIP file containing workflow source files that are used to resolve local imports. This zip bundle will be unpacked in a sandbox accessible to the workflow.
     -i INPUT, -\-input INPUT
         Path to a local JSON file specifying workflow inputs.
     -o <updated_json>, -\-upload <updated_json>
@@ -204,6 +206,8 @@ to see the usage information::
         Disable SSL verification for web requests. Not recommended for general usage, but can be useful for intra-networks which don't support SSL verification.
     -\-time-out TIME_OUT
         Keep on checking the job's status until time_out (in hours) is reached. Notice that if this option is set, Altocumulus won't terminate until reaching *TIME_OUT* hour(s).
+    -\-profile PROFILE
+        AWS profile. Only works if dealing with AWS, and if not set, use the default profile.
     -h, -\-help
         Show this help message and exit
 
@@ -344,6 +348,8 @@ to see the usage information::
         Port number for Cromwell service. The default port is ``8000``.
     -\-id JOB_ID
         Workflow ID returned in **alto cromwell run** command.
+    -\-profile PROFILE
+        AWS profile. Only works if dealing with AWS, and if not set, use the default profile.
     -h, -\-help
         Show this help message and exit
 
@@ -438,6 +444,8 @@ to see the usage information::
         Causes upload to run in "dry run" mode, i.e., just outputting what would be uploaded without actually doing any uploading.
     \-o <updated_json>
         Output updated input JSON file to <updated_json>
+    -\-profile PROFILE
+        AWS profile. Only works if dealing with AWS, and if not set, use the default profile.
     -h, -\-help
         Show this help message and exit
 
