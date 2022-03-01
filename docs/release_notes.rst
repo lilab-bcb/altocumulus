@@ -1,3 +1,15 @@
+Version 2.0.1 `March 1, 2022`
+----------------------------------
+
+* Add ``--profile`` option to allow use a specific AWS profile when dealing with AWS backend:
+
+  * In **terra** command: ``run`` and ``get_logs`` sub-commands.
+  * In **upload** command.
+* In **cromwell** ``run`` sub-command:
+
+  * Add ``-d`` option to allow attach dependency WDL files along with the main workflow WDL file specified in ``-m`` option.
+  * Fix the issue on processing floating numbers in workflow input JSON files.
+
 Version 2.0.0 `January 12, 2022`
 -----------------------------------
 
