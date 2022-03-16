@@ -12,7 +12,6 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
 from pathlib import Path
 import sys
 
@@ -23,7 +22,7 @@ sys.path.insert(0, str(HERE.parent))
 # -- Project information -----------------------------------------------------
 
 project = "Altocumulus"
-copyright = "2021 The Broad Institute, Inc. and The General Hospital Corporation. All rights reserved."
+copyright = "2021 - 2022 Genentech, Inc. and the Broad Institute, Inc. All rights reserved."
 author = (
     "Bo Li, Yiming Yang, Rimte Rocher"
 )
@@ -31,7 +30,7 @@ author = (
 # The short X.Y version
 version = "2.0"
 # The full version, including alpha/beta/rc tags
-release = "2.0.1"
+release = "2.0.2"
 
 
 # -- General configuration ---------------------------------------------------
@@ -94,7 +93,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 pygments_style = "sphinx"
 
 intersphinx_mapping = dict(
-    anndata=('https://anndata.readthedocs.io/en/latest/', None),
     numpy=('https://docs.scipy.org/doc/numpy/', None),
     pandas=('http://pandas.pydata.org/pandas-docs/stable/', None),
 )
@@ -144,7 +142,7 @@ htmlhelp_basename = "altocumulus_doc"
 
 
 def setup(app):
-    app.add_css_file("css/custom.css")
+    app.add_css_file("custom.css")
 
 
 # -- Options for LaTeX output ------------------------------------------------
