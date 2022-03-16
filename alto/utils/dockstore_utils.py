@@ -1,7 +1,5 @@
 import os
-import json
 import requests
-from requests.structures import CaseInsensitiveDict
 from urllib.parse import urljoin
 from typing import Tuple
 
@@ -105,21 +103,23 @@ def get_dockstore_workflow(
 
     if version is None:
         version = workflow_content["defaultVersion"]
-        workflow_path = workflow_content["workflow_path"]
         print(f"Workflow version is not specified. Using default version {version} instead.")
-    else:
-        version_l = version.lower()
-        find_version = False
-        for version_item in workflow_content["workflowVersions"]:
-            if version_l == version_item["name"].lower():
-                find_version = True
-                break
 
-        if not find_version:
-            raise ValueError(f"Unable to locate workflow version {version} for workflow {workflow}!")
+    version_l = version.lower()
+    find_version = False
+    for version_item in workflow_content["workflowVersions"]:
+        if version_l == version_item["name"].lower():
+            find_version = True
+            break
 
-        version = version_item["name"]
-        workflow_path = version_item["workflow_path"]
+    if not find_version:
+        raise ValueError(f"Unable to locate workflow version {version} for workflow {workflow}!")
+
+    if version_item["hidden"]:
+        raise ValueError(f"Version {version} of workflow {workflow} is hidden. Unable to use it!")
+
+    version = version_item["name"]
+    workflow_path = version_item["workflow_path"]
 
     table = str.maketrans({'/': '%2F'})
     methodPath = workflow_content["full_workflow_path"].translate(table)
