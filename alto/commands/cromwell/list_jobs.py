@@ -37,16 +37,21 @@ def show_jobs(df: pd.DataFrame):
     if "creator" not in df.columns:
         df["creator"] = ""
     print(
-        "{:<38} {:<16} {:<24} {:<13} {:<28} {:<28} {:<28}".format(
+        "{:<38} {:<16} {:<38} {:<13} {:<28} {:<28} {:<28}".format(
             "Job ID", "Creator", "Workflow", "Status", "Submitted", "Start", "End"
         )
     )
 
     for _, row in df.iterrows():
-        show_str = "{:<38} {:<16} {:<24} {:<13} {:<28} {:<28} {:<28}".format(
+        if row.get("name") is not None:
+            row_name = row["name"]
+        else:
+            row_name = row["id"]
+
+        show_str = "{:<38} {:<16} {:<38} {:<13} {:<28} {:<28} {:<28}".format(
             row["id"],
             row["creator"],
-            row["name"],
+            row_name,
             row["status"],
             row["submission"],
             row["start"],
