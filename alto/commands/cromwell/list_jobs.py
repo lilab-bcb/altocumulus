@@ -43,15 +43,10 @@ def show_jobs(df: pd.DataFrame):
     )
 
     for _, row in df.iterrows():
-        if row.get("name") is not None:
-            row_name = row["name"]
-        else:
-            row_name = ""
-
         show_str = "{:<38} {:<16} {:<24} {:<13} {:<28} {:<28} {:<28}".format(
             row["id"],
             row["creator"],
-            row_name,
+            row["name"] if row.get("name") is not None else "",
             row["status"],
             row["submission"],
             row["start"],
