@@ -375,7 +375,7 @@ Type::
 to see the usage information::
 
     Usage:
-        alto cromwell list_jobs [-h] -s SERVER [-p PORT] [-a] [-u USER] [--only-succeeded] [--only-running] [--only-failed]
+        alto cromwell list_jobs [-h] -s SERVER [-p PORT] [-a] [-u USER] [--only-succeeded] [--only-running] [--only-failed] [-n NUM_SHOWN]
 
 * Options:
 
@@ -393,6 +393,8 @@ to see the usage information::
         Only show jobs that are running.
     -\-only-failed
         Only show jobs that have failed or have aborted.
+    -n NUM_SHOWN
+        Only show the <num_shown> most recent jobs.
     -h, -\-help
         Show this help message and exit
 
@@ -406,7 +408,7 @@ to see the usage information::
 
     alto cromwell list_jobs -s my-server.com
     alto cromwell list_jobs -s my-server.com -a
-    alto cromwell list_jobs -s my-server.com -u some-username --only-succeeded
+    alto cromwell list_jobs -s my-server.com -u some-username --only-succeeded -n 10
 
 
 Upload to cloud
