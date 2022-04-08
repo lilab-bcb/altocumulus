@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime
 from dateutil import parser
 import time
-from typing import List
+from typing import List, Optional
 
 
 def datetime_from_utc_to_local(utc_datetime: str) -> str:
@@ -33,7 +33,10 @@ def show_one_job(s: str, status: str):
         print(s)
 
 
-def show_jobs(df: pd.DataFrame):
+def show_jobs(
+    df: pd.DataFrame,
+    num_shown: Optional[int],
+) -> None:
     if "creator" not in df.columns:
         df["creator"] = ""
     print(
@@ -41,6 +44,9 @@ def show_jobs(df: pd.DataFrame):
             "Job ID", "Creator", "Workflow", "Status", "Submitted", "Start", "End"
         )
     )
+
+    if num_shown is not None:
+        df = df[0:num_shown]
 
     for _, row in df.iterrows():
         show_str = "{:<38} {:<16} {:<24} {:<13} {:<28} {:<28} {:<28}".format(
@@ -61,7 +67,8 @@ def list_jobs(
     is_all: bool,
     username: str,
     job_statuses: List[str],
-):
+    num_shown: Optional[int],
+) -> None:
     query_data = []
     query_data.append({"additionalQueryResultFields": "labels"})
     if not is_all:
@@ -86,7 +93,7 @@ def list_jobs(
         res["end"] = datetime_from_utc_to_local(res.get("end", ""))
     if resp.status_code == 200:
         df_jobs = pd.DataFrame.from_records(resp_dict["results"])
-        show_jobs(df_jobs)
+        show_jobs(df_jobs, num_shown=num_shown)
     else:
         print(resp_dict["message"])
 
@@ -104,9 +111,10 @@ def main(argv):
     parser.add_argument(
         "-p",
         "--port",
+        type=int,
         dest="port",
         action="store",
-        default="8000",
+        default=8000,
         help="Port number for Cromwell service. The default port is 8000.",
     )
     parser.add_argument(
@@ -146,6 +154,14 @@ def main(argv):
         default=False,
         help="Only show jobs that have failed or have aborted.",
     )
+    parser.add_argument(
+        "-n",
+        type=int,
+        dest="num_shown",
+        action="store",
+        default=None,
+        help="Only show the <num_shown> most recent jobs.",
+    )
 
     args = parser.parse_args(argv)
 
@@ -158,4 +174,4 @@ def main(argv):
     elif args.only_running:
         job_statuses.append("Running")
 
-    list_jobs(args.server, args.port, args.is_all, args.user, job_statuses)
+    list_jobs(args.server, args.port, args.is_all, args.user, job_statuses, args.num_shown)
