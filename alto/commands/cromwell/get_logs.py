@@ -42,7 +42,6 @@ def get_logs(server, port, top_job_id, cur_job_id, profile):
             processed_tasks.add(task_name)
 
     resp_meta = requests.get(f"http://{server}:{port}/api/workflows/v1/{cur_job_id}/metadata")
-    print(f"http://{server}:{port}/api/workflows/v1/{cur_job_id}/metadata")
     meta_dict = resp_meta.json()
     if resp_meta.status_code != 200:
         raise Exception(meta_dict['message'])
