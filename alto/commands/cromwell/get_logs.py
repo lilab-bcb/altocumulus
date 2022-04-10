@@ -40,10 +40,9 @@ def get_logs(server, port, top_job_id, cur_job_id, profile):
                 get_remote_log_file(log['stderr'], top_job_id, profile)
                 get_remote_log_file(log['stdout'], top_job_id, profile)
             processed_tasks.add(task_name)
-    #else:
-    #    print("No call log for this job.")
 
     resp_meta = requests.get(f"http://{server}:{port}/api/workflows/v1/{cur_job_id}/metadata")
+    print(f"http://{server}:{port}/api/workflows/v1/{cur_job_id}/metadata")
     meta_dict = resp_meta.json()
     if resp_meta.status_code != 200:
         raise Exception(meta_dict['message'])
@@ -53,10 +52,9 @@ def get_logs(server, port, top_job_id, cur_job_id, profile):
         for task_name, task_list in meta_dict['calls'].items():
             if task_name not in processed_tasks:
                 for task in task_list:
-                    subworkflow_id = task['subWorkflowId']
-                    get_logs(server, port, top_job_id, subworkflow_id, profile)
-    #else:
-    #    print("No call log for subworkflows of this job.")
+                    if 'subWorkflowId' in task.keys():
+                        subworkflow_id = task['subWorkflowId']
+                        get_logs(server, port, top_job_id, subworkflow_id, profile)
 
 
 def main(argv):
