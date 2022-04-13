@@ -2,8 +2,9 @@ import argparse, getpass, json, os, requests, time, zipfile
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
 
-wf_label_filename = ".workflow_labels.json"
-wf_option_filename = ".workflow_options.json"
+cur_pid = os.getpid()
+wf_label_filename = f".{cur_pid}.workflow_labels.json"
+wf_option_filename = f".{cur_pid}.workflow_options.json"
 
 
 def parse_bucket_folder_url(bucket):
@@ -64,9 +65,9 @@ def parse_workflow_str(method_str, no_ssl_verify):
 
 def check_zip(dependency_str):
     is_dependency = False
-    if os.path.isfile(dependency_str) and zipfile.is_zipfile(dependency_str): 
+    if os.path.isfile(dependency_str) and zipfile.is_zipfile(dependency_str):
         is_dependency = True
-    return is_dependency   
+    return is_dependency
 
 def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket, no_cache, no_ssl_verify, time_out, profile, dependency_str):
     files = dict()
@@ -123,17 +124,18 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
         files['workflowOptions'] = open(wf_option_filename, 'rb')
 
     # Send HTTP request to Cromwell server
-    resp = requests.post(
-        f"http://{server}:{port}/api/workflows/v1",
-        files=files,
-        data=data,
-    )
-
-    # Remove intermediate input files
-    if os.path.exists(wf_label_filename):
-        os.remove(wf_label_filename)
-    if os.path.exists(wf_option_filename):
-        os.remove(wf_option_filename)
+    try:
+        resp = requests.post(
+            f"http://{server}:{port}/api/workflows/v1",
+            files=files,
+            data=data,
+        )
+    finally:
+        # Remove intermediate input files
+        if os.path.exists(wf_label_filename):
+            os.remove(wf_label_filename)
+        if os.path.exists(wf_option_filename):
+            os.remove(wf_option_filename)
 
     # Process response.
     resp_dict = resp.json()
@@ -168,11 +170,11 @@ def main(argv):
               (2) An HTTP or HTTPS URL of a WDL file. \
               (3) A local path to a WDL file."
     )
-    parser.add_argument('-d', '--dependency', dest='dependency_str', action='store', 
+    parser.add_argument('-d', '--dependency', dest='dependency_str', action='store',
         help="ZIP file containing workflow source files that are used \
               to resolve local imports. This zip bundle will be unpacked \
               in a sandbox accessible to the workflow."
-    )    
+    )
     parser.add_argument('-i', '--input', dest='input', action='store', required=True,
         help="Path to a local JSON file specifying workflow inputs."
     )
