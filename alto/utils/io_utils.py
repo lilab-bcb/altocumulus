@@ -10,7 +10,7 @@ from typing import Tuple, Dict
 
 from alto.utils import prefix_float, run_command
 from .bcl_utils import lane_manager, path_is_flowcell, transfer_flowcell
-
+from .fastq_utils import folder_is_fastq, transfer_fastq
 
 
 def read_wdl_inputs(input_json: str) -> dict:
@@ -71,6 +71,7 @@ def transfer_data(
     flowcells: Dict[str, lane_manager] = None,
     verbose: bool = True,
     profile: Optional[str] = None,
+    is_fastq_dir: bool = False,
 ) -> None:
     """Transfer source to dest (cloud destination).
        backend, choosing from gcp and aws.
@@ -79,7 +80,7 @@ def transfer_data(
     if verbose:
         print(f'{"Dry run: " if dry_run else ""}Uploading {source} to {dest}.')
 
-    if path_is_flowcell(source):
+    if (not is_fastq_dir) and path_is_flowcell(source):
         lanes = flowcells[source].get_lanes() if flowcells is not None else ['*']
         transfer_flowcell(
             source=source,
@@ -87,6 +88,15 @@ def transfer_data(
             backend=backend,
             lanes=lanes,
             dry_run=dry_run,
+            profile=profile,
+        )
+    elif is_fastq_dir:
+        transfer_fastq(
+            source=source,
+            dest=dest,
+            backend=backend,
+            dry_run=dry_run,
+            verbose=verbose,
             profile=profile,
         )
     else:
@@ -135,24 +145,41 @@ def transfer_sample_sheet(
         for idx, row in df[1:].iterrows():
             flowcells[row['flowcell']].update_lanes(row['lane'])
 
-    for idx, row in df[1:].iterrows():
+    sample_keyword = 'library' if 'library' in col_names else 'sample'
+    idx_sample = np.where(col_names==sample_keyword)[0][0] if np.where(col_names==sample_keyword)[0].size > 0 else None
+
+    for _, row in df[1:].iterrows():
+        sample_name = row[idx_sample] if idx_sample is not None else None
         for idxc, value in row.iteritems():
             if isinstance(value, str) and os.path.exists(value):
-                value = os.path.abspath(value)
-                sub_url = input_file_to_output_url.get(value, None)
+                is_fastq_dir = False
+                file_pattern = folder_is_fastq(value, sample_name)
+                if file_pattern is not None:
+                    # Fastq folder.
+                    is_fastq_dir = True
+                    source = file_pattern
+                    local_path = os.path.abspath(value) + '/' + sample_name
+                    sub_url = input_file_to_output_url.get(local_path, None)
+                else:
+                    # BCL folder, or file.
+                    source = os.path.abspath(value)
+                    sub_url = input_file_to_output_url.get(source, None)
+
                 if sub_url is None:
-                    sub_url = url_gen.get_unique_url(value)
+                    path_key = source if not is_fastq_dir else local_path
+                    sub_url = url_gen.get_unique_url(path_key)
                     transfer_data(
-                        source=value,
+                        source=source,
                         dest=sub_url,
                         backend=backend,
                         dry_run=dry_run,
                         flowcells=flowcells,
                         verbose=verbose,
                         profile=profile,
+                        is_fastq_dir=is_fastq_dir,
                     )
-                    input_file_to_output_url[value] = sub_url
-                row[idxc] = sub_url
+                    input_file_to_output_url[path_key] = sub_url
+                row[idxc] = sub_url if not is_fastq_dir else os.path.dirname(sub_url)
                 is_changed = True
 
     if is_changed:
