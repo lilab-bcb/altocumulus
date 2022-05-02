@@ -221,6 +221,10 @@ def upload_to_cloud_bucket(
         Path for the JSON file storing updated inputs.
     dry_run: `bool`
         If dry run, only print commands but do not execute.
+    verbose: `bool`, default: ``True``
+        If print out the underlying upload commands on screen.
+    profile: `str`, default: ``None``
+        For AWS backend only, it's used for specifying a non-default AWS profile.
 
     Returns
     -------
@@ -228,7 +232,7 @@ def upload_to_cloud_bucket(
 
     Examples
     --------
-    >>> upload_to_cloud_bucket(inputs, 'gcp', 'my_bucket', 'input_files', 'updated_inputs.json', False)
+    >>> upload_to_cloud_bucket(inputs, 'gcp', 'my_bucket', 'input_files', 'updated_inputs.json')
     """
     if bucket_folder is not None:
         bucket += f"/{bucket_folder.strip('/')}"

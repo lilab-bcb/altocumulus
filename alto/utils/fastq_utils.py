@@ -17,7 +17,6 @@ def folder_is_fastq(
         return None
 
 
-
 def transfer_fastq(
     source: str,
     dest: str,
