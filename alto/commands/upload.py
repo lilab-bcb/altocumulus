@@ -46,4 +46,12 @@ def main(argv):
             import uuid
             inputs.update({str(uuid.uuid1()): path})
 
-    upload_to_cloud_bucket(inputs, backend, bucket, args.bucket_folder, args.out_json, args.dry_run, args.profile)
+    upload_to_cloud_bucket(
+        inputs=inputs,
+        backend=backend,
+        bucket=bucket,
+        bucket_folder=args.bucket_folder,
+        out_json=args.out_json,
+        dry_run=args.dry_run,
+        profile=args.profile,
+    )
