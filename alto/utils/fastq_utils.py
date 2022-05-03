@@ -9,10 +9,33 @@ def folder_is_fastq(
     if (prefix is None) or (not os.path.isdir(path)):
         return None
 
-    if len(glob.glob(f"{path}/{prefix}_*.fastq.gz")) > 0:
+    # Check folder permission.
+    if not os.access(path, os.X_OK):
+        raise PermissionError(f"Need execution access to folder '{path}'!")
+
+    fa_list = glob.glob(f"{path}/{prefix}_*.fastq.gz")
+    if len(fa_list) > 0:
+        # Check fastq file permission.
+        for f in fa_list:
+            if not os.access(f, os.R_OK):
+                raise PermissionError(f"Need read access to '{f}'!")
+
         return os.path.abspath(f"{path}/{prefix}_*.fastq.gz")
-    elif os.path.isdir(f"{path}/{prefix}") and (len(glob.glob(f"{path}/{prefix}/{prefix}_*.fastq.gz")) > 0):
-        return os.path.abspath(f"{path}/{prefix}/{prefix}_*.fastq.gz")
+    elif os.path.isdir(f"{path}/{prefix}"):
+        # Check subfolder permission.
+        if not os.access(f"{path}/{prefix}", os.X_OK):
+            raise PermissionError(f"Need execution access to folder '{path}/{prefix}'!")
+
+        fa_list = glob.glob(f"{path}/{prefix}/{prefix}_*.fastq.gz")
+        if len(fa_list) > 0:
+            # Check fastq file permission.
+            for f in fa_list:
+                if not os.access(f, os.R_OK):
+                    raise PermissionError(f"Need read access to '{f}'!")
+
+            return os.path.abspath(f"{path}/{prefix}/{prefix}_*.fastq.gz")
+        else:
+            return None
     else:
         return None
 

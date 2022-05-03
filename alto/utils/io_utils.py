@@ -132,6 +132,11 @@ def transfer_sample_sheet(
     """
     is_changed = False
 
+    # Terminate if no access to sample sheet.
+    if not os.access(input_file, os.R_OK):
+        raise PermissionError(f"Need read access to '{input_file}'!")
+
+    # If cannot process, upload its original content.
     try:
         df = pd.read_csv(input_file, sep=None, engine='python', header=None, index_col=False)
     except Exception:
