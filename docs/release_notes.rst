@@ -1,5 +1,16 @@
 .. role:: small
 
+Version 2.0.3 :small:`May 24, 2022`
+--------------------------------------
+
+* Support uploading only the FASTQ files with filename prefix specified within the source folder, instead of the whole folder, to the Cloud. [PR `#24 <https://github.com/lilab-bcb/altocumulus/pull/24>`_]
+* In ``cromwell list_jobs`` command, add ``-n`` option to show only top *n* jobs. [PR `#21 <https://github.com/lilab-bcb/altocumulus/pull/21>`_]
+* Bug fix:
+
+  * Make all the temporary files with filenames unique per process, and remove them even when submission fails.
+  * Fix the issue in ``cromwell list_jobs`` command when workflows' names are not returned by Cromwell API. [PR `#20 <https://github.com/lilab-bcb/altocumulus/pull/20>`_ by `Asma Bankapur <https://github.com/asmariyaz23>`_]
+  * Fix the issue in ``cromwell get_logs`` command when no subworkflow exists in a WDL subtask call. [PR `#22 <https://github.com/lilab-bcb/altocumulus/pull/22>`_]
+
 Version 2.0.2 :small:`March 16, 2022`
 --------------------------------------
 
