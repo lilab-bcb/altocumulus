@@ -7,6 +7,7 @@ import pandas as pd
 import tempfile
 from collections import defaultdict
 from typing import Tuple, Dict
+from glob import glob
 
 from alto.utils import prefix_float, run_command
 from .bcl_utils import lane_manager, path_is_flowcell, transfer_flowcell
@@ -53,11 +54,14 @@ class cloud_url_factory: # class to make sure all cloud urls are unique
 
     def get_unique_url(self, input_path: str):
         counter = 1
-        uniq_url = f'{self.scheme}://{self.bucket}/{os.path.basename(input_path)}'
-        root, ext = os.path.splitext(uniq_url)
-        while uniq_url in self.unique_urls:
-            counter += 1
-            uniq_url = f'{root}_{counter}{ext}'
+        if glob(input_path+"_*.fastq.gz"):
+            uniq_url = f'{self.scheme}://{self.bucket}/{os.path.basename(os.path.dirname(input_path))}/'
+        else:
+            uniq_url = f'{self.scheme}://{self.bucket}/{os.path.basename(input_path)}'
+            root, ext = os.path.splitext(uniq_url)
+            while uniq_url in self.unique_urls:
+                counter += 1
+                uniq_url = f'{root}_{counter}{ext}'
         self.unique_urls.add(uniq_url)
 
         return uniq_url
