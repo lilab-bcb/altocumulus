@@ -55,7 +55,7 @@ class cloud_url_factory: # class to make sure all cloud urls are unique
 
     def get_unique_url(self, input_path: str):
         counter = 1
-        if glob(input_path+"_*.fastq.gz") or os.path.isdir(input_path):
+        if glob(input_path+"_*.fastq.gz"):
             uniq_url = f'{self.scheme}://{self.bucket}/{os.path.basename(os.path.dirname(input_path))}/'
             pathdir = os.path.basename(os.path.dirname(input_path))
             input_dirname = self.unique_urls_d.get(uniq_url,"")
