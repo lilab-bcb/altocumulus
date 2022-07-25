@@ -52,16 +52,38 @@ class cloud_url_factory: # class to make sure all cloud urls are unique
         self.bucket = bucket
         self.unique_urls = set()
         self.unique_urls_d = dict()
+        self.lastBaseDir = ""
+        self.parentDirCounter = 1
 
     def get_unique_url(self, input_path: str):
         counter = 1
+        is_fastq_dir = False
+        if os.path.isdir(input_path):
+            listOfFiles = []
+            for (dirpath, dirnames, filenames) in os.walk(input_path):
+                listOfFiles += [os.path.join(dirpath, file) for file in filenames if file.endswith("fastq.gz")]
+            if listOfFiles:    
+                is_fastq_dir = True            
         if glob(input_path+"_*.fastq.gz"):
             uniq_url = f'{self.scheme}://{self.bucket}/{os.path.basename(os.path.dirname(input_path))}/'
             pathdir = os.path.basename(os.path.dirname(input_path))
             input_dirname = self.unique_urls_d.get(uniq_url,"")
             while uniq_url in self.unique_urls and input_dirname != os.path.dirname(input_path):
                 counter += 1
-                uniq_url = f'{self.scheme}://{self.bucket}/{pathdir}_{counter}/'         
+                uniq_url = f'{self.scheme}://{self.bucket}/{pathdir}_{counter}/'
+        elif is_fastq_dir:
+            uniq_url = f'{self.scheme}://{self.bucket}/{os.path.basename(os.path.dirname(input_path))}/{os.path.basename(input_path)}/'
+            input_dirname = self.unique_urls_d.get(uniq_url,"")
+
+            if uniq_url in self.unique_urls and self.lastBaseDir == os.path.dirname(os.path.dirname(input_path)):
+                uniq_url = f'{self.scheme}://{self.bucket}/{os.path.basename(os.path.dirname(input_path))}_{self.parentDirCounter}/{os.path.basename(input_path)}/'
+            elif uniq_url in self.unique_urls and input_dirname != os.path.dirname(input_path):
+                self.parentDirCounter += 1
+                uniq_url = f'{self.scheme}://{self.bucket}/{os.path.basename(os.path.dirname(input_path))}_{self.parentDirCounter}/{os.path.basename(input_path)}/'
+            elif uniq_url not in self.unique_urls and self.lastBaseDir == os.path.dirname(os.path.dirname(input_path)) and self.parentDirCounter > 1:
+                uniq_url = f'{self.scheme}://{self.bucket}/{os.path.basename(os.path.dirname(input_path))}_{self.parentDirCounter}/{os.path.basename(input_path)}/'
+
+            self.lastBaseDir = os.path.dirname(os.path.dirname(input_path))
         else:
             uniq_url = f'{self.scheme}://{self.bucket}/{os.path.basename(input_path)}'
             root, ext = os.path.splitext(uniq_url)
