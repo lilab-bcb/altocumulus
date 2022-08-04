@@ -9,7 +9,7 @@ setup(
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     description="Command line utilities for running workflows",
-    author="Cumulus Team",
+    author="Yiming Yang, Joshual Gould, Bo Li",
     author_email="cumulus-support@googlegroups.com",
     url='https://github.com/lilab-bcb/altocumulus',
     long_description=long_description,
@@ -30,8 +30,11 @@ setup(
             'Operating System :: Microsoft :: Windows',
             'Operating System :: POSIX :: Linux',
             'Programming Language :: Python :: 3',
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
             'Topic :: Scientific/Engineering :: Bio-Informatics'
     ],
-    python_requires='>= 3',
+    python_requires='>= 3.8',
     entry_points={'console_scripts': ['alto=alto.__main__:main']},
 )
