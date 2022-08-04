@@ -2,48 +2,30 @@ import glob, os
 from alto.utils import run_command
 from typing import Optional
 
-def folder_is_fastq(
-    path: str,
-    prefix: Optional[str] = None,
-) -> Optional[str]:
-    if (prefix is None) or (not os.path.isdir(path)):
-        return None
+class sample_manager:
+    def __init__(self):
+        self.samples = set()
 
-    # Check folder permission.
-    if not os.access(path, os.X_OK):
-        raise PermissionError(f"Need execution access to folder '{path}'!")
+    def update_samples(self, sample_name: str):
+        if sample_name in self.samples:
+            raise ValueError(f"{sample_name} is duplicated!")
+        self.samples.add(sample_name)
 
-    fa_list = glob.glob(f"{path}/{prefix}_*.fastq.gz")
-    if len(fa_list) > 0:
-        # Check fastq file permission.
-        for f in fa_list:
-            if not os.access(f, os.R_OK):
-                raise PermissionError(f"Need read access to '{f}'!")
+    def get_samples(self) -> List[str]:
+        return list(self.samples)
 
-        return os.path.abspath(f"{path}/{prefix}_*.fastq.gz")
-    elif os.path.isdir(f"{path}/{prefix}"):
-        # Check subfolder permission.
-        if not os.access(f"{path}/{prefix}", os.X_OK):
-            raise PermissionError(f"Need execution access to folder '{path}/{prefix}'!")
 
-        fa_list = glob.glob(f"{path}/{prefix}/{prefix}_*.fastq.gz")
-        if len(fa_list) > 0:
-            # Check fastq file permission.
-            for f in fa_list:
-                if not os.access(f, os.R_OK):
-                    raise PermissionError(f"Need read access to '{f}'!")
-
-            return os.path.abspath(f"{path}/{prefix}/{prefix}_*.fastq.gz")
-        else:
-            return None
-    else:
-        return None
+def path_is_fastq(path: str) -> bool:
+    """If path represents FASTQ files .
+    """
+    return len(glob.glob(f"{path}/*.fastq.gz")) > 0 or len(glob.glob(f"{path}/*/*.fastq.gz")) > 0
 
 
 def transfer_fastq(
     source: str,
     dest: str,
     backend: str,
+    samples: List[str],
     dry_run: bool,
     profile: Optional[str] = None,
     verbose: bool = True,
