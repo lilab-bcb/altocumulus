@@ -14,7 +14,7 @@ Users who want to use this subcommand need to write their own lims_query package
 
     parser.add_argument('pid', metavar='projectID', help='Project ID.')
     parser.add_argument('-o', dest='csv_file', help='Write metadata information to a CSV file.')
-    
+
     args = parser.parse_args(argv)
 
     try:
@@ -28,5 +28,5 @@ Users who want to use this subcommand need to write their own lims_query package
 
     if args.csv_file != None:
         df.to_csv(args.csv_file)
-
-    print(df.to_string())
+    else:
+        print(df.to_string())
