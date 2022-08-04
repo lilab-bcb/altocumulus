@@ -9,7 +9,7 @@ setup(
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     description="Command line utilities for running workflows",
-    author="Yiming Yang, Joshual Gould, Bo Li",
+    author="Yiming Yang, Joshua Gould, Bo Li",
     author_email="cumulus-support@googlegroups.com",
     url='https://github.com/lilab-bcb/altocumulus',
     long_description=long_description,
