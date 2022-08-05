@@ -1,6 +1,6 @@
 import glob, os
 from alto.utils import run_command
-from typing import Optional
+from typing import List, Optional
 
 class sample_manager:
     def __init__(self):
@@ -30,12 +30,15 @@ def transfer_fastq(
     profile: Optional[str] = None,
     verbose: bool = True,
 ) -> None:
-    if os.path.isdir(source):
-        strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', '--quiet', source, dest]
-    else:
-        strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', '-m', '--quiet', source, os.path.dirname(dest) + '/']
+    for sample in samples:
+        if len(glob.glob(f"{source}/{sample}_*.fastq.gz")) > 0:
+            strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', '-m', '--quiet', f"{source}/{sample}_*.fastq.gz", dest + '/']
+        elif len(glob.glob(f"{source}/{sample}/{sample}_*.fastq.gz")) > 0:
+            strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', '--quiet', f"{source}/{sample}", f"{dest}/{sample}"]
+        else:
+            raise ValueError(f"'{sample}' doesn't have any corresponding FASTQ file!")
 
-    if profile is not None:
-        strato_cmd.extend(['--profile', profile])
+        if profile is not None:
+            strato_cmd.extend(['--profile', profile])
 
-    run_command(strato_cmd, dry_run, suppress_stdout=not verbose)
+        run_command(strato_cmd, dry_run, suppress_stdout=not verbose)
