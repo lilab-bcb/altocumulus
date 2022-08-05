@@ -29,10 +29,10 @@ class lane_manager:
         return res
 
 
-def path_is_flowcell(path: str) -> bool:
+def path_is_bcl(path: str) -> bool:
     """If path represents BCL files of one sequencing flowcell.
     """
-    return os.path.isdir(path) and os.path.exists(f'{path}/RunInfo.xml')
+    return os.path.exists(f'{path}/RunInfo.xml')
 
 
 def transfer_flowcell(

@@ -1,59 +1,44 @@
 import glob, os
 from alto.utils import run_command
-from typing import Optional
+from typing import List, Optional
 
-def folder_is_fastq(
-    path: str,
-    prefix: Optional[str] = None,
-) -> Optional[str]:
-    if (prefix is None) or (not os.path.isdir(path)):
-        return None
+class sample_manager:
+    def __init__(self):
+        self.samples = set()
 
-    # Check folder permission.
-    if not os.access(path, os.X_OK):
-        raise PermissionError(f"Need execution access to folder '{path}'!")
+    def update_samples(self, sample_name: str):
+        if sample_name in self.samples:
+            raise ValueError(f"{sample_name} is duplicated!")
+        self.samples.add(sample_name)
 
-    fa_list = glob.glob(f"{path}/{prefix}_*.fastq.gz")
-    if len(fa_list) > 0:
-        # Check fastq file permission.
-        for f in fa_list:
-            if not os.access(f, os.R_OK):
-                raise PermissionError(f"Need read access to '{f}'!")
+    def get_samples(self) -> List[str]:
+        return list(self.samples)
 
-        return os.path.abspath(f"{path}/{prefix}_*.fastq.gz")
-    elif os.path.isdir(f"{path}/{prefix}"):
-        # Check subfolder permission.
-        if not os.access(f"{path}/{prefix}", os.X_OK):
-            raise PermissionError(f"Need execution access to folder '{path}/{prefix}'!")
 
-        fa_list = glob.glob(f"{path}/{prefix}/{prefix}_*.fastq.gz")
-        if len(fa_list) > 0:
-            # Check fastq file permission.
-            for f in fa_list:
-                if not os.access(f, os.R_OK):
-                    raise PermissionError(f"Need read access to '{f}'!")
-
-            return os.path.abspath(f"{path}/{prefix}/{prefix}_*.fastq.gz")
-        else:
-            return None
-    else:
-        return None
+def path_is_fastq(path: str) -> bool:
+    """If path represents FASTQ files .
+    """
+    return len(glob.glob(f"{path}/*.fastq.gz")) > 0 or len(glob.glob(f"{path}/*/*.fastq.gz")) > 0
 
 
 def transfer_fastq(
     source: str,
     dest: str,
     backend: str,
+    samples: List[str],
     dry_run: bool,
     profile: Optional[str] = None,
     verbose: bool = True,
 ) -> None:
-    if os.path.isdir(source):
-        strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', '--quiet', source, dest]
-    else:
-        strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', '-m', '--quiet', source, os.path.dirname(dest) + '/']
+    for sample in samples:
+        if len(glob.glob(f"{source}/{sample}_*.fastq.gz")) > 0:
+            strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', '-m', '--quiet', f"{source}/{sample}_*.fastq.gz", dest + '/']
+        elif len(glob.glob(f"{source}/{sample}/{sample}_*.fastq.gz")) > 0:
+            strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', '--quiet', f"{source}/{sample}", f"{dest}/{sample}"]
+        else:
+            raise ValueError(f"'{sample}' doesn't have any corresponding FASTQ file!")
 
-    if profile is not None:
-        strato_cmd.extend(['--profile', profile])
+        if profile is not None:
+            strato_cmd.extend(['--profile', profile])
 
-    run_command(strato_cmd, dry_run, suppress_stdout=not verbose)
+        run_command(strato_cmd, dry_run, suppress_stdout=not verbose)
