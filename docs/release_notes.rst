@@ -4,7 +4,7 @@ Version 2.1.0 :small:`August 4, 2022`
 --------------------------------------
 
 * Altocumulus now only works with Python 3.8+.
-* Bug fix on FASTQ file uploading via input sample sheet.
+* Improve FASTQ file uploading. [PR `#28 <https://github.com/lilab-bcb/altocumulus/pull/28>`_]
 
 Version 2.0.3 :small:`May 24, 2022`
 --------------------------------------
