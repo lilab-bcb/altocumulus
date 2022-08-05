@@ -1,13 +1,8 @@
-from typing import Optional
-import os
-import re
-import json
+import os, re, json, tempfile
 import numpy as np
 import pandas as pd
-import tempfile
 from collections import namedtuple
-from typing import Tuple, Dict
-from glob import glob
+from typing import Dict, Tuple, Optional
 
 from alto.utils import prefix_float, run_command
 from .bcl_utils import lane_manager, path_is_bcl, transfer_flowcell
@@ -72,7 +67,7 @@ def transfer_data(
     dest: str,
     backend: str,
     dry_run: bool,
-    flowcells: Dict[str, FlowCellType] = None,
+    flowcells: Dict[str, FlowcellType] = None,
     profile: Optional[str] = None,
     verbose: bool = True,
 ) -> None:
@@ -152,7 +147,8 @@ def transfer_sample_sheet(
     flowcells = {}
     col_names = np.char.array(df.iloc[0,:], unicode = True).lower()
 
-    if 'flowcell' in col_names:
+    if ('flowcell' in col_names) or ('location' in col_names):
+        flowcell_keyword = 'flowcell' if 'flowcell' in col_names else 'location'
         df.columns = col_names
 
         sample_keyword = None
@@ -162,9 +158,9 @@ def transfer_sample_sheet(
             sample_keyword = 'sample'
         else:
             raise ValueError("Cannot detect either Library or Sample column in the sample sheet!")
-        
+
         for _, row in df[1:].iterrows():
-            path = os.path.abspath(row['flowcell'])
+            path = os.path.abspath(row[flowcell_keyword])
             if not os.path.isdir(path):
                 raise ValueError(f"{path} is not a folder!")
             if not os.access(path, os.X_OK):
