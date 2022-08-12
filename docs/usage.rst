@@ -451,6 +451,29 @@ to see the usage information::
     -h, -\-help
         Show this help message and exit
 
+LIMS Query
+============
+
+``alto query``
+-------------------
+
+Query project metadata from a LIMS (Laboratory Information Management System) via RESTful APIs.
+
+Given one project ID, this subcommand tries to fetch and display a vareity of metadata from the project. This subcommand also provides an option to write the metadata into a CSV file if the query type is "ngs".
+
+Using this subcommand requires ``lims_query`` Python package installed. Users who want to use this subcommand need to write their own lims_query package, which should at least contain one function::
+
+    query_ngs(project_id: str) -> pandas.DataFrame
+
+* Arguments:
+
+    -\-type {ngs,project}
+        Specify query type. Choose from "ngs" for FASTQ info or "project" for project metadata.
+    \-o CSV_FILE
+        Write metadata information to a CSV file ``CSV_FILE``.
+    -h, -\-help
+        Show this help message and exit.
+
 Logs
 =====
 
@@ -478,7 +501,6 @@ to see the usage information::
 
     -\-plot PLOT  Optional filename to create a plot of utilization vs. time
     -h, -\-help   show this help message and exit
-
 
 
 
