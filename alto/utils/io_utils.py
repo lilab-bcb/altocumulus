@@ -164,21 +164,18 @@ def transfer_sample_sheet(
             if isinstance(row[flowcell_keyword], str):
                 path = row[flowcell_keyword].strip()
 
-                if not os.path.exists(path):
-                    if path.startswith("gs://") or path.startswith("s3://"):
-                        continue
-                else:
-                    raise ValueError(f"{path} does not exist!")
+                if path.startswith("gs://") or path.startswith("s3://"):
+                    continue
 
+                path = os.path.abspath(path)
+                if not os.path.exists(path):
+                    raise ValueError(f"{path} does not exist!")
                 if not os.path.isdir(path):
                     raise ValueError(f"{path} is not a folder!")
-
                 if not os.access(path, os.X_OK):
                     raise PermissionError(f"Need execution access to folder '{path}'!")
             else:
                 raise ValueError(f"{row[flowcell_keyword]} is not in string type!")
-
-            path = os.path.abspath(path)
 
             flowcell = None
             if path in flowcells:
