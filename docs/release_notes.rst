@@ -1,10 +1,16 @@
 .. role:: small
 
+Version 2.1.1 :small:`August 12,2022`
+--------------------------------------
+
+* Add ``--type`` option to ``query`` command to specify query type.
+
 Version 2.1.0 :small:`August 4, 2022`
 --------------------------------------
 
 * Altocumulus now only works with Python 3.8+.
 * Improve FASTQ file uploading. [PR `#28 <https://github.com/lilab-bcb/altocumulus/pull/28>`_]
+* Add ``query`` command to query project metadata from a LIMS (Laboratory Information Management System) via RESTful APIs.
 
 Version 2.0.3 :small:`May 24, 2022`
 --------------------------------------
