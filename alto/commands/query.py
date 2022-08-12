@@ -13,7 +13,7 @@ Users who want to use this subcommand need to write their own lims_query package
     query_ngs(project_id: str) -> pd.DataFrame.', formatter_class=RawTextHelpFormatter)
 
     parser.add_argument('pid', metavar='projectID', help='Project ID.')
-    parser.add_argument('--type', choices = ['ngs', 'project'], default='ngs', help='Specify query time. Choose from "ngs" for FASTQ info or "project" for project metadata.')
+    parser.add_argument('--type', choices = ['ngs', 'project'], default='ngs', help='Specify query type. Choose from "ngs" for FASTQ info or "project" for project metadata.')
     parser.add_argument('-o', dest='csv_file', help='Write metadata information to a CSV file.')
 
     args = parser.parse_args(argv)
