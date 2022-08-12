@@ -29,6 +29,7 @@ Users who want to use this subcommand need to write their own lims_query package
         df = query_ngs(args.pid)
         if args.csv_file != None:
             df.to_csv(args.csv_file)
+            print(f"Metadata is written to '{args.csv_file}'.")
         else:
             print(df.to_string())
     else:
