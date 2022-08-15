@@ -147,6 +147,7 @@ def transfer_sample_sheet(
     flowcells = {}
     col_names = np.char.array(df.iloc[0,:], unicode = True).lower()
 
+    # Upload BCL folder or FASTQ files if needed.
     if ('flowcell' in col_names) or ('location' in col_names):
         flowcell_keyword = 'flowcell' if 'flowcell' in col_names else 'location'
         df.columns = col_names
@@ -160,11 +161,21 @@ def transfer_sample_sheet(
             raise ValueError("Cannot detect either Library or Sample column in the sample sheet!")
 
         for _, row in df[1:].iterrows():
-            path = os.path.abspath(row[flowcell_keyword])
-            if not os.path.isdir(path):
-                raise ValueError(f"{path} is not a folder!")
-            if not os.access(path, os.X_OK):
-                raise PermissionError(f"Need execution access to folder '{path}'!")
+            if isinstance(row[flowcell_keyword], str):
+                path = row[flowcell_keyword].strip()
+
+                if path.startswith("gs://") or path.startswith("s3://"):
+                    continue
+
+                path = os.path.abspath(path)
+                if not os.path.exists(path):
+                    raise ValueError(f"{path} does not exist!")
+                if not os.path.isdir(path):
+                    raise ValueError(f"{path} is not a folder!")
+                if not os.access(path, os.X_OK):
+                    raise PermissionError(f"Need execution access to folder '{path}'!")
+            else:
+                raise ValueError(f"{row[flowcell_keyword]} is not in string type!")
 
             flowcell = None
             if path in flowcells:
