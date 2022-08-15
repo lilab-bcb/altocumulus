@@ -93,6 +93,8 @@ def list_jobs(
         res["end"] = datetime_from_utc_to_local(res.get("end", ""))
     if resp.status_code == 200:
         df_jobs = pd.DataFrame.from_records(resp_dict["results"])
+        if 'name' in df_jobs:
+            df_jobs['name'] = df_jobs['name'].fillna('')
         show_jobs(df_jobs, num_shown=num_shown)
     else:
         print(resp_dict["message"])
