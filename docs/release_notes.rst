@@ -1,5 +1,11 @@
 .. role:: small
 
+Version 2.1.2 :small:`August 15, 2022`
+--------------------------------------
+
+* Bug fix on BCL folder and FASTQ file uploading. [PR `#30 <https://github.com/lilab-bcb/altocumulus/pull/30>`_]
+* In ``cromwell list_jobs`` command, assign informative names for jobs with ``nan`` workflow name. [PR `#31 <https://github.com/lilab-bcb/altocumulus/pull/31>`_ and `#32 <https://github.com/lilab-bcb/altocumulus/pull/32>`_]
+
 Version 2.1.1 :small:`August 12,2022`
 --------------------------------------
 
