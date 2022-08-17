@@ -1,4 +1,8 @@
 import argparse, getpass, json, os, requests, time, zipfile
+import tempfile
+
+import WDL
+
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 from alto.utils import parse_dockstore_workflow, get_dockstore_workflow
 
@@ -81,12 +85,28 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
     else:
         files['workflowSource'] = open(workflow_str, 'rb')
 
+    tmp_zip_file = None
     # Process workflow WDL's dependency
     if dependency_str is not None:
         if check_zip(dependency_str):
             files['workflowDependencies'] = open(dependency_str, 'rb')
         else:
             raise Exception('Dependency zip file does not exist or is not given in zip format.')
+    elif not is_url:
+        doc = WDL.load(workflow_str)
+        deps = []
+        workflow_dir = os.path.dirname(workflow_str)
+        for d in doc.imports:
+            # TODO add imports recursively
+            imported_path = os.path.join(workflow_dir, d.uri)
+            if os.path.exists(imported_path):
+                deps.append(imported_path)
+        if len(deps) > 0:
+            tmp_zip_file = tempfile.mkstemp(prefix='alto', suffix='.zip')[1]
+            with zipfile.ZipFile(tmp_zip_file, "w", zipfile.ZIP_DEFLATED) as out:
+                for dep in deps:
+                    out.write(dep, arcname=os.path.basename(dep))
+            files['workflowDependencies'] = open(tmp_zip_file, 'rb')
 
     # Process job's workflow inputs
     inputs = read_wdl_inputs(wf_input_path)
@@ -132,6 +152,8 @@ def submit_to_cromwell(server, port, method_str, wf_input_path, out_json, bucket
         )
     finally:
         # Remove intermediate input files
+        if tmp_zip_file is not None and os.path.exists(tmp_zip_file):
+            os.remove(tmp_zip_file)
         if os.path.exists(wf_label_filename):
             os.remove(wf_label_filename)
         if os.path.exists(wf_option_filename):
