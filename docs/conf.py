@@ -8,12 +8,14 @@
 
 # -- Path setup --------------------------------------------------------------
 
+import sys
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 from pathlib import Path
-import sys
+
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent))
@@ -23,9 +25,7 @@ sys.path.insert(0, str(HERE.parent))
 
 project = "Altocumulus"
 copyright = "2021 - 2022 Genentech, Inc. and the Broad Institute, Inc. All rights reserved."
-author = (
-    "Bo Li, Yiming Yang, Rimte Rocher"
-)
+author = "Bo Li, Yiming Yang, Rimte Rocher"
 
 # The short X.Y version
 version = "2.1"
@@ -37,7 +37,7 @@ release = "2.1.2"
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = '1.7'
+needs_sphinx = "1.7"
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -58,10 +58,7 @@ extensions = [
     "sphinx_autodoc_typehints",
 ]
 
-autodoc_default_options = {
-    "members": True,
-    "member-order": "bysource"
-}
+autodoc_default_options = {"members": True, "member-order": "bysource"}
 autosummary_generate = True
 todo_include_todos = False
 
@@ -93,8 +90,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 pygments_style = "sphinx"
 
 intersphinx_mapping = dict(
-    numpy=('https://docs.scipy.org/doc/numpy/', None),
-    pandas=('http://pandas.pydata.org/pandas-docs/stable/', None),
+    numpy=("https://docs.scipy.org/doc/numpy/", None),
+    pandas=("http://pandas.pydata.org/pandas-docs/stable/", None),
 )
 
 

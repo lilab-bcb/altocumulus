@@ -1,20 +1,19 @@
-import argparse
-import getpass
-import requests
-import pandas as pd
-from datetime import datetime
-from dateutil import parser
 import time
+import getpass
+import argparse
+from datetime import datetime
 from typing import List, Optional
+
+import pandas as pd
+import requests
+from dateutil import parser
 
 
 def datetime_from_utc_to_local(utc_datetime: str) -> str:
     if not utc_datetime:
         return ""
     now_timestamp = time.time()
-    offset = datetime.fromtimestamp(now_timestamp) - datetime.utcfromtimestamp(
-        now_timestamp
-    )
+    offset = datetime.fromtimestamp(now_timestamp) - datetime.utcfromtimestamp(now_timestamp)
     return (parser.parse(utc_datetime) + offset).strftime("%d %b %Y, %H:%M:%S")
 
 
@@ -93,9 +92,12 @@ def list_jobs(
         res["end"] = datetime_from_utc_to_local(res.get("end", ""))
     if resp.status_code == 200:
         df_jobs = pd.DataFrame.from_records(resp_dict["results"])
-        if 'name' in df_jobs:
-            df_jobs.loc[(df_jobs['name'].isna()) & (df_jobs['status'].isin(['Submitted', 'Running'])), 'name'] = '<parsing workflow>'
-            df_jobs['name'] = df_jobs['name'].fillna('<failed before exec>')
+        if "name" in df_jobs:
+            df_jobs.loc[
+                (df_jobs["name"].isna()) & (df_jobs["status"].isin(["Submitted", "Running"])),
+                "name",
+            ] = "<parsing workflow>"
+            df_jobs["name"] = df_jobs["name"].fillna("<failed before exec>")
         show_jobs(df_jobs, num_shown=num_shown)
     else:
         print(resp_dict["message"])
