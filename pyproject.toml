@@ -2,3 +2,27 @@
 requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
 
 [tool.setuptools_scm]
+
+[tool.black]
+line-length = 100
+include = '\.pyi?$'
+
+[tool.docformatter]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = 'black'
+length_sort_straight = true
+line_length = 100
+lines_after_imports = 2
+
+[tool.flake8]
+max-line-length = 100
+include = '\.pyi?$'
+ignore = [
+    'E731', # Do not assign a lambda expression, use a def
+    'E203', # whitespace before ':'
+    'W503', # line break before binary operator ==
+    'E501', # Line too long (82 > 79 characters)
+    'E722', # Do not use bare except, specify exception instead
+]
