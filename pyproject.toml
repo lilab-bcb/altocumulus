@@ -1,6 +1,17 @@
 [build-system]
 requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
 
+[project]
+name = 'altocumulus'
+description = 'Command line utilities for workflows on Terra or Cromwell'
+readme = 'README.rst'
+dynamic = ['version']
+
+[project.optional-dependencies]
+test = [
+    'pytest'
+]
+
 [tool.setuptools_scm]
 
 [tool.black]
