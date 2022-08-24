@@ -1,11 +1,11 @@
 import os
-import requests
-from urllib.parse import urljoin
 from typing import Tuple
+from urllib.parse import urljoin
+
+import requests
 
 
 dockstore_api = "https://dockstore.org/api/"
-
 
 
 def parse_dockstore_workflow(workflow_string: str) -> Tuple[str, str, str, str]:
@@ -25,9 +25,11 @@ def parse_dockstore_workflow(workflow_string: str) -> Tuple[str, str, str, str]:
     --------
     >>> organization, collection, workflow, version = parse_dockstore_workflow('broadinstitute:cumulus:cumulus:1.5.0')
     """
-    fields = workflow_string.split(':')
+    fields = workflow_string.split(":")
     if len(fields) < 3 or len(fields) > 4:
-        raise ValueError(f"workflow_string should contain only 3 or 4 items. But {workflow_string} contains {len(fields)} items!")
+        raise ValueError(
+            f"workflow_string should contain only 3 or 4 items. But {workflow_string} contains {len(fields)} items!"
+        )
 
     organization = fields[0]
     collection = fields[1]
@@ -75,14 +77,19 @@ def get_dockstore_workflow(
     --------
     >>> results = get_dockstore_workflow('broadinstitute', 'cumulus', 'cumulus')
     """
-    org = requests.get(urljoin(dockstore_api, f"organizations/name/{organization}"), verify=ssl_verify)
+    org = requests.get(
+        urljoin(dockstore_api, f"organizations/name/{organization}"), verify=ssl_verify
+    )
     if org.status_code != 200:
         raise ValueError(f"Unable to locate organization {organization} - {org.content.decode()}!")
-    coll = requests.get(urljoin(dockstore_api, f"organizations/{organization}/collections/{collection}/name"), verify=ssl_verify)
+    coll = requests.get(
+        urljoin(dockstore_api, f"organizations/{organization}/collections/{collection}/name"),
+        verify=ssl_verify,
+    )
     if coll.status_code != 200:
         raise ValueError(f"Unable to locate collection {collection} - {coll.content.decode()}!")
 
-    workflow_l = workflow.lower() # convert to lowercase
+    workflow_l = workflow.lower()  # convert to lowercase
     find_workflow = False
     for entry in coll.json()["entries"]:
         workflow_name = os.path.basename(entry["entryPath"]).lower()
@@ -95,9 +102,13 @@ def get_dockstore_workflow(
 
     workflow_id = entry["id"]
 
-    workflow_entry = requests.get(urljoin(dockstore_api, f"workflows/published/{workflow_id}"), verify=ssl_verify)
+    workflow_entry = requests.get(
+        urljoin(dockstore_api, f"workflows/published/{workflow_id}"), verify=ssl_verify
+    )
     if workflow_entry.status_code != 200:
-        raise ValueError(f"Unable to fetch information for workflow {workflow} - {workflow_entry.content.decode()}!")
+        raise ValueError(
+            f"Unable to fetch information for workflow {workflow} - {workflow_entry.content.decode()}!"
+        )
 
     workflow_content = workflow_entry.json()
 
@@ -121,11 +132,11 @@ def get_dockstore_workflow(
     version = version_item["name"]
     workflow_path = version_item["workflow_path"]
 
-    table = str.maketrans({'/': '%2F'})
+    table = str.maketrans({"/": "%2F"})
     methodPath = workflow_content["full_workflow_path"].translate(table)
 
     # Get rid of "github.com" prefix.
-    repo_path = '/'.join(workflow_content["path"].split('/')[1:])
+    repo_path = "/".join(workflow_content["path"].split("/")[1:])
 
     results = {
         "name": workflow_content["workflowName"],
@@ -134,7 +145,7 @@ def get_dockstore_workflow(
         "workflow_path": workflow_path,
         "url": f"https://raw.githubusercontent.com/{repo_path}/{version}{workflow_path}",
         "methodPath": methodPath,
-        "methodUri": f"dockstore://{methodPath}/{version}"
+        "methodUri": f"dockstore://{methodPath}/{version}",
     }
 
     return results

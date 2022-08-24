@@ -1,15 +1,20 @@
-import os, re, json, tempfile
+import os
+import re
+import json
+import tempfile
+from collections import namedtuple
+from typing import Dict, Optional, Tuple
+
 import numpy as np
 import pandas as pd
-from collections import namedtuple
-from typing import Dict, Tuple, Optional
 
 from alto.utils import prefix_float, run_command
+
 from .bcl_utils import lane_manager, path_is_bcl, transfer_flowcell
-from .fastq_utils import sample_manager, path_is_fastq, transfer_fastq
+from .fastq_utils import path_is_fastq, sample_manager, transfer_fastq
 
 
-FlowcellType = namedtuple('FlowcellType', ['type', 'manager'])
+FlowcellType = namedtuple("FlowcellType", ["type", "manager"])
 
 
 def read_wdl_inputs(input_json: str) -> dict:
@@ -35,7 +40,7 @@ def read_wdl_inputs(input_json: str) -> dict:
 
     wdl_inputs = None
     if os.path.exists(input_json):
-        with open(input_json, 'r') as f:
+        with open(input_json, "r") as f:
             wdl_inputs = json.loads(f.read(), parse_float=float_parser)
     else:
         wdl_inputs = json.loads(input_json, parse_float=float_parser)
@@ -43,20 +48,22 @@ def read_wdl_inputs(input_json: str) -> dict:
     return wdl_inputs
 
 
-class cloud_url_factory: # class to make sure all cloud urls are unique
-    def __init__(self, backend, bucket): # here bucket should also include bucket folder information
-        assert backend in {'gcp', 'aws'}
-        self.scheme = 'gs' if backend == 'gcp' else 's3'
+class cloud_url_factory:  # class to make sure all cloud urls are unique
+    def __init__(
+        self, backend, bucket
+    ):  # here bucket should also include bucket folder information
+        assert backend in {"gcp", "aws"}
+        self.scheme = "gs" if backend == "gcp" else "s3"
         self.bucket = bucket
         self.unique_urls = set()
 
     def get_unique_url(self, input_path: str):
         counter = 1
-        uniq_url = f'{self.scheme}://{self.bucket}/{os.path.basename(input_path)}'
+        uniq_url = f"{self.scheme}://{self.bucket}/{os.path.basename(input_path)}"
         root, ext = os.path.splitext(uniq_url)
         while uniq_url in self.unique_urls:
             counter += 1
-            uniq_url = f'{root}_{counter}{ext}'
+            uniq_url = f"{root}_{counter}{ext}"
         self.unique_urls.add(uniq_url)
 
         return uniq_url
@@ -72,15 +79,15 @@ def transfer_data(
     verbose: bool = True,
 ) -> None:
     """Transfer source to dest (cloud destination).
-       backend, choosing from gcp and aws.
-       flowcells is a global flowcell manangement object.
+    backend, choosing from gcp and aws.
+    flowcells is a global flowcell manangement object.
     """
     if verbose:
         print(f'{"Dry run: " if dry_run else ""}Uploading {source} to {dest}.')
 
-    if flowcells != None and source in flowcells:
+    if flowcells is not None and source in flowcells:
         flowcell = flowcells[source]
-        if flowcell.type == 'bcl':
+        if flowcell.type == "bcl":
             transfer_flowcell(
                 source=source,
                 dest=dest,
@@ -91,7 +98,7 @@ def transfer_data(
                 verbose=verbose,
             )
         else:
-            assert flowcell.type == 'fastq'
+            assert flowcell.type == "fastq"
             transfer_fastq(
                 source=source,
                 dest=dest,
@@ -103,9 +110,19 @@ def transfer_data(
             )
     else:
         if os.path.isdir(source):
-            strato_cmd = ['strato', 'sync', '--backend', backend, '--ionice', '-m', '--quiet', source, dest]
+            strato_cmd = [
+                "strato",
+                "sync",
+                "--backend",
+                backend,
+                "--ionice",
+                "-m",
+                "--quiet",
+                source,
+                dest,
+            ]
         else:
-            strato_cmd = ['strato', 'cp', '--backend', backend, '--ionice', '--quiet', source, dest]
+            strato_cmd = ["strato", "cp", "--backend", backend, "--ionice", "--quiet", source, dest]
 
         if profile is not None:
             strato_cmd.extend(["--profile", profile])
@@ -122,15 +139,15 @@ def transfer_sample_sheet(
     verbose: bool = True,
 ) -> Tuple[str, bool]:
     """Check sample sheet and upload files inside it.
-       input_file: sample sheet
-       backend: choosing from 'gcp' and 'aws'
-       input_file_to_output_url: global dictionary maps local files to cloud urls
-       url_gen: cloud url factory to make sure no duplicated cloud urls
-       dry_run: if dry run
-       verbose: if print info
-       profile: if not None, use for AWS backend.
+    input_file: sample sheet
+    backend: choosing from 'gcp' and 'aws'
+    input_file_to_output_url: global dictionary maps local files to cloud urls
+    url_gen: cloud url factory to make sure no duplicated cloud urls
+    dry_run: if dry run
+    verbose: if print info
+    profile: if not None, use for AWS backend.
 
-       Returns: path to updated input file (if changed) and if sample sheet is changed
+    Returns: path to updated input file (if changed) and if sample sheet is changed
     """
     is_changed = False
 
@@ -140,23 +157,23 @@ def transfer_sample_sheet(
 
     # If cannot process, upload its original content.
     try:
-        df = pd.read_csv(input_file, sep=None, engine='python', header=None, index_col=False)
+        df = pd.read_csv(input_file, sep=None, engine="python", header=None, index_col=False)
     except Exception:
         return input_file, is_changed
 
     flowcells = {}
-    col_names = np.char.array(df.iloc[0,:], unicode = True).lower()
+    col_names = np.char.array(df.iloc[0, :], unicode=True).lower()
 
     # Upload BCL folder or FASTQ files if needed.
-    if ('flowcell' in col_names) or ('location' in col_names):
-        flowcell_keyword = 'flowcell' if 'flowcell' in col_names else 'location'
+    if ("flowcell" in col_names) or ("location" in col_names):
+        flowcell_keyword = "flowcell" if "flowcell" in col_names else "location"
         df.columns = col_names
 
         sample_keyword = None
-        if 'library' in col_names:
-            sample_keyword = 'library'
-        elif 'sample' in col_names:
-            sample_keyword = 'sample'
+        if "library" in col_names:
+            sample_keyword = "library"
+        elif "sample" in col_names:
+            sample_keyword = "sample"
         else:
             raise ValueError("Cannot detect either Library or Sample column in the sample sheet!")
 
@@ -182,15 +199,15 @@ def transfer_sample_sheet(
                 flowcell = flowcells[path]
             else:
                 if path_is_bcl(path):
-                    flowcell = FlowcellType(type='bcl', manager=lane_manager())
+                    flowcell = FlowcellType(type="bcl", manager=lane_manager())
                 elif path_is_fastq(path):
-                    flowcell = FlowcellType(type='fastq', manager=sample_manager())
+                    flowcell = FlowcellType(type="fastq", manager=sample_manager())
                 else:
                     raise ValueError(f"{path} is neither a BCL folder nor a FASTQ folder!")
                 flowcells[path] = flowcell
 
-            if flowcell.type == 'bcl':
-                flowcell.manager.update_lanes(row['lane'] if 'lane' in row else '*')
+            if flowcell.type == "bcl":
+                flowcell.manager.update_lanes(row["lane"] if "lane" in row else "*")
             else:
                 flowcell.manager.update_samples(row[sample_keyword])
 
@@ -220,14 +237,15 @@ def transfer_sample_sheet(
         orig_file = input_file
         input_file = tempfile.mkstemp()[1]
         if verbose:
-            print(f'Rewriting file {orig_file} to {input_file}.')
-        out_sep = ',' if orig_file.endswith('.csv') else '\t'
+            print(f"Rewriting file {orig_file} to {input_file}.")
+        out_sep = "," if orig_file.endswith(".csv") else "\t"
         df.to_csv(input_file, sep=out_sep, index=False, header=False)
 
     return input_file, is_changed
 
 
-search_inside_file_whitelist = set(['.txt', '.xlsx', '.tsv', '.csv'])
+search_inside_file_whitelist = set([".txt", ".xlsx", ".tsv", ".csv"])
+
 
 def upload_to_cloud_bucket(
     inputs: Dict[str, str],
@@ -278,7 +296,7 @@ def upload_to_cloud_bucket(
         input_path = v
         if isinstance(input_path, str) and os.path.exists(input_path):
             input_path = os.path.abspath(input_path)
-            if input_path in input_file_to_output_url: # if this file has been processed, skip
+            if input_path in input_file_to_output_url:  # if this file has been processed, skip
                 continue
 
             input_url = url_gen.get_unique_url(input_path)
@@ -309,10 +327,10 @@ def upload_to_cloud_bucket(
             )
 
             inputs[k] = input_url
-            if is_changed: # delete temporary file after uploading
+            if is_changed:  # delete temporary file after uploading
                 os.remove(input_path)
 
     if out_json is not None:
-        with open(out_json, 'w') as fout:
+        with open(out_json, "w") as fout:
             res_str = json.dumps(inputs, indent=4)
-            fout.write(re.sub(f'"{prefix_float}(.+)"', r'\1', res_str))
+            fout.write(re.sub(f'"{prefix_float}(.+)"', r"\1", res_str))
