@@ -4,7 +4,7 @@ import argparse
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
-from alto.commands import cromwell, parse_monitoring_log, query, terra, upload
+from alto.commands import cromwell, parse_monitoring_log, terra, upload
 
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -20,8 +20,7 @@ def main():
         "terra": terra,
         "upload": upload,
         "parse_monitoring_log": parse_monitoring_log,
-        "cromwell": cromwell,
-        "query": query,
+        "cromwell": cromwell
     }
 
     parser = argparse.ArgumentParser(description="Run an altocumulus command.")
