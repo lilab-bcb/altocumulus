@@ -20,7 +20,7 @@ def main():
         "terra": terra,
         "upload": upload,
         "parse_monitoring_log": parse_monitoring_log,
-        "cromwell": cromwell
+        "cromwell": cromwell,
     }
 
     parser = argparse.ArgumentParser(description="Run an altocumulus command.")
