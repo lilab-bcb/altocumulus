@@ -13,11 +13,6 @@ from alto.utils import get_dockstore_workflow, parse_dockstore_workflow
 from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
 
 
-cur_pid = os.getpid()
-wf_label_filename = f".{cur_pid}.workflow_labels.json"
-wf_option_filename = f".{cur_pid}.workflow_options.json"
-
-
 def parse_bucket_folder_url(bucket):
     assert "://" in bucket, "Bucket folder URL must start with 's3://' or 'gs://'."
 
@@ -156,6 +151,7 @@ def submit_to_cromwell(
     # Add username to the job labels
     label_dict["creator"] = getpass.getuser()
 
+    wf_label_filename = tempfile.mkstemp(prefix="alto_wf_label_", suffix=".json")[1]
     with open(wf_label_filename, "w") as fp:
         json.dump(label_dict, fp)
     files["labels"] = open(wf_label_filename, "rb")
@@ -165,6 +161,7 @@ def submit_to_cromwell(
         wf_option_dict = {
             "read_from_cache": False,
         }
+        wf_option_filename = tempfile.mkstemp(prefix="alto_wf_option_", suffix=".json")[1]
         with open(wf_option_filename, "w") as fp:
             json.dump(wf_option_dict, fp)
         files["workflowOptions"] = open(wf_option_filename, "rb")
