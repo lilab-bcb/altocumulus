@@ -125,13 +125,14 @@ def submit_to_cromwell(
                     add_deps(imported_path)
 
         # add imports recursively
-        add_deps(workflow_str)
-        if len(deps) > 0:
-            tmp_zip_file = tempfile.mkstemp(prefix="alto", suffix=".zip")[1]
-            with zipfile.ZipFile(tmp_zip_file, "w", zipfile.ZIP_DEFLATED) as out:
-                for dep in deps:
-                    out.write(dep, arcname=os.path.basename(dep))
-            files["workflowDependencies"] = open(tmp_zip_file, "rb")
+        if os.path.exists(workflow_str):
+            add_deps(workflow_str)
+            if len(deps) > 0:
+                tmp_zip_file = tempfile.mkstemp(prefix="alto", suffix=".zip")[1]
+                with zipfile.ZipFile(tmp_zip_file, "w", zipfile.ZIP_DEFLATED) as out:
+                    for dep in deps:
+                        out.write(dep, arcname=os.path.basename(dep))
+                files["workflowDependencies"] = open(tmp_zip_file, "rb")
 
     # Process job's workflow inputs
     inputs = read_wdl_inputs(wf_input_path)
