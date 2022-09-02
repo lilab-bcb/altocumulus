@@ -182,20 +182,19 @@ def submit_to_cromwell(
         if os.path.exists(wf_option_filename):
             os.remove(wf_option_filename)
 
-    # Process response.
+    # Process response
     resp_dict = resp.json()
-
-    if resp.status_code == 201:
-        if time_out is None:
-            print(f"Job {resp_dict['id']} is in status {resp_dict['status']}.")
+    successful_submission = resp.status_code == 201
+    if successful_submission:
+        print(f"Job {resp_dict['id']} submitted.")
     else:
         print(resp_dict["message"])
 
-    # Enter the monitor mode
+    # Wait for job to complete
     if time_out is not None:
         status = wait_and_check(server, port, resp_dict["id"], time_out)
         print(f"{{\"job_id\": \"{resp_dict['id']}\", \"status\": \"{status}\"}}")
-    if resp.status_code == 201:
+    if successful_submission:
         return resp_dict["id"]
 
 
