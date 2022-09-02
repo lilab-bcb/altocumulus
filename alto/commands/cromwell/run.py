@@ -118,7 +118,7 @@ def submit_to_cromwell(
         def add_deps(path):
             workflow_dir = os.path.dirname(path)
             for d in get_workflow_imports(path):
-                imported_path = os.path.abspath(os.path.join(workflow_dir, d.uri))
+                imported_path = os.path.abspath(os.path.join(workflow_dir, d))
                 if os.path.exists(imported_path):
                     deps.add(imported_path)
                     add_deps(imported_path)
