@@ -6,6 +6,15 @@ name = 'altocumulus'
 description = 'Command line utilities for workflows on Terra or Cromwell'
 readme = 'README.rst'
 dynamic = ['version']
+dependencies = [
+    "firecloud",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "python-dateutil",
+    "six",
+    "stratocumulus>=0.1.7"
+]
 
 [project.optional-dependencies]
 test = [

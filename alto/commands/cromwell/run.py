@@ -6,11 +6,10 @@ import zipfile
 import argparse
 import tempfile
 
-import WDL
 import requests
 
 from alto.utils import get_dockstore_workflow, parse_dockstore_workflow
-from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
+from alto.utils.io_utils import get_workflow_imports, read_wdl_inputs, upload_to_cloud_bucket
 
 
 def parse_bucket_folder_url(bucket):
@@ -118,11 +117,12 @@ def submit_to_cromwell(
 
         def add_deps(path):
             workflow_dir = os.path.dirname(path)
-            for d in WDL.load(path).imports:
+            workflow = get_workflow_imports(path)
+            for d in workflow.imports:
                 imported_path = os.path.abspath(os.path.join(workflow_dir, d.uri))
-                if os.path.exists(imported_path):
-                    deps.add(imported_path)
-                    add_deps(imported_path)
+            if os.path.exists(imported_path):
+                deps.add(imported_path)
+                add_deps(imported_path)
 
         # add imports recursively
         if os.path.exists(workflow_str):

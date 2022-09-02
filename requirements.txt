@@ -1,6 +1,5 @@
 firecloud
 matplotlib
-miniwdl
 numpy
 pandas
 python-dateutil

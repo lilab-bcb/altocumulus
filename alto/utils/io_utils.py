@@ -16,6 +16,19 @@ from .fastq_utils import path_is_fastq, sample_manager, transfer_fastq
 
 FlowcellType = namedtuple("FlowcellType", ["type", "manager"])
 
+import_pattern = '^import "(.+)"'
+
+
+def get_workflow_imports(path):
+    workflow_imports = []
+    with open(path, "rt") as f:
+        for line in f:
+            line = line.strip()
+            result = re.match(import_pattern, line)
+            if result:
+                workflow_imports.append(result.group(1))
+    return workflow_imports
+
 
 def read_wdl_inputs(input_json: str) -> dict:
     """Load inputs from either a JSON file or a JSON string.
