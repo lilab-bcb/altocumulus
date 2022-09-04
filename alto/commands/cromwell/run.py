@@ -6,11 +6,10 @@ import zipfile
 import argparse
 import tempfile
 
-import WDL
 import requests
 
 from alto.utils import get_dockstore_workflow, parse_dockstore_workflow
-from alto.utils.io_utils import read_wdl_inputs, upload_to_cloud_bucket
+from alto.utils.io_utils import get_workflow_imports, read_wdl_inputs, upload_to_cloud_bucket
 
 
 def parse_bucket_folder_url(bucket):
@@ -114,20 +113,25 @@ def submit_to_cromwell(
         else:
             raise Exception("Dependency zip file does not exist or is not given in zip format.")
     elif not is_url:
-        doc = WDL.load(workflow_str)
-        deps = []
-        workflow_dir = os.path.dirname(workflow_str)
-        for d in doc.imports:
-            # TODO add imports recursively
-            imported_path = os.path.join(workflow_dir, d.uri)
-            if os.path.exists(imported_path):
-                deps.append(imported_path)
-        if len(deps) > 0:
-            tmp_zip_file = tempfile.mkstemp(prefix="alto", suffix=".zip")[1]
-            with zipfile.ZipFile(tmp_zip_file, "w", zipfile.ZIP_DEFLATED) as out:
-                for dep in deps:
-                    out.write(dep, arcname=os.path.basename(dep))
-            files["workflowDependencies"] = open(tmp_zip_file, "rb")
+        deps = set()
+
+        def add_deps(path):
+            workflow_dir = os.path.dirname(path)
+            for d in get_workflow_imports(path):
+                imported_path = os.path.abspath(os.path.join(workflow_dir, d))
+                if os.path.exists(imported_path):
+                    deps.add(imported_path)
+                    add_deps(imported_path)
+
+        # add imports recursively
+        if os.path.exists(workflow_str):
+            add_deps(workflow_str)
+            if len(deps) > 0:
+                tmp_zip_file = tempfile.mkstemp(prefix="alto", suffix=".zip")[1]
+                with zipfile.ZipFile(tmp_zip_file, "w", zipfile.ZIP_DEFLATED) as out:
+                    for dep in deps:
+                        out.write(dep, arcname=os.path.basename(dep))
+                files["workflowDependencies"] = open(tmp_zip_file, "rb")
 
     # Process job's workflow inputs
     inputs = read_wdl_inputs(wf_input_path)
@@ -156,6 +160,7 @@ def submit_to_cromwell(
         json.dump(label_dict, fp)
     files["labels"] = open(wf_label_filename, "rb")
 
+    wf_option_filename = None
     # Process job's workflow options.
     if no_cache:
         wf_option_dict = {
@@ -179,7 +184,7 @@ def submit_to_cromwell(
             os.remove(tmp_zip_file)
         if os.path.exists(wf_label_filename):
             os.remove(wf_label_filename)
-        if os.path.exists(wf_option_filename):
+        if wf_option_filename is not None and os.path.exists(wf_option_filename):
             os.remove(wf_option_filename)
 
     # Process response
