@@ -1,27 +1,76 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
+build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "setuptools_scm[toml]>=3.4",
+]
 
 [project]
-name = 'altocumulus'
-description = 'Command line utilities for workflows on Terra or Cromwell'
-readme = 'README.rst'
-dynamic = ['version']
+name = "altocumulus"
+description = "Command line utilities for workflows on Terra or Cromwell"
+authors = [
+    {name = "Bo Li"},
+    {name = "Joshua Gould"},
+    {name = "Yiming Yang"},
+    {email = "cumulus-support@googlegroups.com"},
+]
+license = {file = "LICENSE"}
+readme = {file = "README.rst", content-type = "text/x-rst"}
+requires-python = ">=3.8"
+dynamic = ["version"]
+keywords = ["Terra", "Cromwell"]
+classifiers=[  # https://pypi.python.org/pypi?%3Aaction=list_classifiers
+    "License :: OSI Approved :: BSD License",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
 dependencies = [
     "firecloud",
     "matplotlib",
     "numpy",
+    "openpyxl",
     "pandas",
     "python-dateutil",
     "six",
     "stratocumulus>=0.1.7"
 ]
 
+[project.scripts]
+alto = "alto.__main__:main"
+
 [project.optional-dependencies]
 test = [
     'pytest'
 ]
 
+[project.urls]
+Repository = "https://github.com/lilab-bcb/altocumulus"
+Documentation = "https://altocumulus.readthedocs.io"
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+include = ["alto*"]
+exclude = ["alto.tests*"]
+
 [tool.setuptools_scm]
+
+[tool.filt.sdist]
+exclude = [
+    "alto/tests",
+]
 
 [tool.black]
 line-length = 100
