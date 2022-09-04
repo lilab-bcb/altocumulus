@@ -1,6 +1,7 @@
 firecloud
 matplotlib
 numpy
+openpyxl
 pandas
 python-dateutil
 six

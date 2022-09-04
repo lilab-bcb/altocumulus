@@ -144,21 +144,25 @@ def transfer_data(
 
 def transfer_sample_sheet(
     input_file: str,
+    input_ext: str,
     backend: str,
     input_file_to_output_url: dict,
     url_gen: cloud_url_factory,
     dry_run: bool,
     profile: Optional[str] = None,
+    nrows: Optional[int] = 10005,
     verbose: bool = True,
 ) -> Tuple[str, bool]:
     """Check sample sheet and upload files inside it.
     input_file: sample sheet
+    input_ext: input file extension, either '.xlsx', '.tsv', or '.csv'
     backend: choosing from 'gcp' and 'aws'
     input_file_to_output_url: global dictionary maps local files to cloud urls
     url_gen: cloud url factory to make sure no duplicated cloud urls
     dry_run: if dry run
+    profile: if not None, use for AWS backend
+    nrows: load at most nrows, if loaded rows == nrows, skip; default: 10005
     verbose: if print info
-    profile: if not None, use for AWS backend.
 
     Returns: path to updated input file (if changed) and if sample sheet is changed
     """
@@ -168,11 +172,21 @@ def transfer_sample_sheet(
     if not os.access(input_file, os.R_OK):
         raise PermissionError(f"Need read access to '{input_file}'!")
 
-    # If cannot process, upload its original content.
-    try:
-        df = pd.read_csv(input_file, sep=None, engine="python", header=None, index_col=False)
-    except Exception:
-        return input_file, is_changed
+    if input_ext == ".csv":
+        df = pd.read_csv(input_file, sep=",", header=None, index_col=False, nrows=nrows)
+    elif input_ext == ".tsv":
+        df = pd.read_csv(input_file, sep="\t", header=None, index_col=False, nrows=nrows)
+    else:
+        assert input_ext == ".xlsx"
+        df = pd.read_excel(input_file, header=None, index_col=False, nrows=nrows)
+
+    if df.shape[0] >= nrows:
+        return (
+            input_file,
+            is_changed,
+        )  # if can load nrows, the file is too large to be a sample sheet
+
+    df = df.applymap(lambda s: s.strip() if isinstance(s, str) else s)  # only strip for strings
 
     flowcells = {}
     col_names = np.char.array(df.iloc[0, :], unicode=True).lower()
@@ -192,7 +206,7 @@ def transfer_sample_sheet(
 
         for _, row in df[1:].iterrows():
             if isinstance(row[flowcell_keyword], str):
-                path = row[flowcell_keyword].strip()
+                path = row[flowcell_keyword]
 
                 if path.startswith("gs://") or path.startswith("s3://"):
                     continue
@@ -257,7 +271,7 @@ def transfer_sample_sheet(
     return input_file, is_changed
 
 
-search_inside_file_whitelist = set([".txt", ".xlsx", ".tsv", ".csv"])
+search_inside_file_whitelist = set([".xlsx", ".tsv", ".csv"])
 
 
 def upload_to_cloud_bucket(
@@ -267,8 +281,9 @@ def upload_to_cloud_bucket(
     bucket_folder: str,
     out_json: str,
     dry_run: bool,
-    verbose: bool = True,
     profile: Optional[str] = None,
+    nrows: Optional[int] = 10005,
+    verbose: bool = True,
 ) -> None:
     """Check and upload local files to the cloud bucket.
 
@@ -286,10 +301,12 @@ def upload_to_cloud_bucket(
         Path for the JSON file storing updated inputs.
     dry_run: `bool`
         If dry run, only print commands but do not execute.
-    verbose: `bool`, default: ``True``
-        If print out the underlying upload commands on screen.
     profile: `str`, default: ``None``
         For AWS backend only, it's used for specifying a non-default AWS profile.
+    nrows: `int`, default: 10005
+        For scanning sample sheets, if file has >= nrows lines, skip.
+    verbose: `bool`, default: ``True``
+        If print out the underlying upload commands on screen.
 
     Returns
     -------
@@ -310,6 +327,7 @@ def upload_to_cloud_bucket(
         if isinstance(input_path, str) and os.path.exists(input_path):
             input_path = os.path.abspath(input_path)
             if input_path in input_file_to_output_url:  # if this file has been processed, skip
+                inputs[k] = input_file_to_output_url[input_path]
                 continue
 
             input_url = url_gen.get_unique_url(input_path)
@@ -322,12 +340,14 @@ def upload_to_cloud_bucket(
                 # look inside input file to see if there are file paths within
                 input_path, is_changed = transfer_sample_sheet(
                     input_file=input_path,
+                    input_ext=input_path_extension,
                     backend=backend,
                     input_file_to_output_url=input_file_to_output_url,
                     url_gen=url_gen,
                     dry_run=dry_run,
-                    verbose=verbose,
                     profile=profile,
+                    nrows=nrows,
+                    verbose=verbose,
                 )
 
             transfer_data(
@@ -335,8 +355,8 @@ def upload_to_cloud_bucket(
                 dest=input_url,
                 backend=backend,
                 dry_run=dry_run,
-                verbose=verbose,
                 profile=profile,
+                verbose=verbose,
             )
 
             inputs[k] = input_url
