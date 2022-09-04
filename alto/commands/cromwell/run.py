@@ -182,19 +182,20 @@ def submit_to_cromwell(
         if os.path.exists(wf_option_filename):
             os.remove(wf_option_filename)
 
-    # Process response.
+    # Process response
     resp_dict = resp.json()
-
-    if resp.status_code == 201:
-        if time_out is None:
-            print(f"Job {resp_dict['id']} is in status {resp_dict['status']}.")
+    successful_submission = resp.status_code == 201
+    if successful_submission:
+        print(f"Job {resp_dict['id']} submitted.")
     else:
         print(resp_dict["message"])
 
-    # Enter the monitor mode
+    # Wait for job to complete
     if time_out is not None:
         status = wait_and_check(server, port, resp_dict["id"], time_out)
         print(f"{{\"job_id\": \"{resp_dict['id']}\", \"status\": \"{status}\"}}")
+    if successful_submission:
+        return resp_dict["id"]
 
 
 def main(argv):
@@ -290,10 +291,16 @@ def main(argv):
         type=str,
         help="AWS profile. Only works if dealing with AWS, and if not set, use the default profile.",
     )
+    parser.add_argument(
+        "--job-id",
+        dest="job_id",
+        type=str,
+        help="Write the job id to the specified output file",
+    )
 
     args = parser.parse_args(argv)
 
-    submit_to_cromwell(
+    job_id = submit_to_cromwell(
         args.server,
         args.port,
         args.method_str,
@@ -306,3 +313,8 @@ def main(argv):
         args.profile,
         args.dependency_str,
     )
+    if args.job_id is not None:
+        with open(args.job_id, "wt") as f:
+            if job_id is not None:
+                f.write(str(job_id))
+            f.write("\n")
