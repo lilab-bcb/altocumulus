@@ -42,7 +42,7 @@ dependencies = [
     "pandas",
     "python-dateutil",
     "six",
-    "stratocumulus>=0.1.7"
+    "stratocumulus>=0.1.7",
 ]
 
 [project.scripts]
@@ -61,16 +61,7 @@ Documentation = "https://altocumulus.readthedocs.io"
 include-package-data = true
 zip-safe = false
 
-[tool.setuptools.packages.find]
-include = ["alto*"]
-exclude = ["alto.tests*"]
-
 [tool.setuptools_scm]
-
-[tool.filt.sdist]
-exclude = [
-    "alto/tests",
-]
 
 [tool.black]
 line-length = 100
