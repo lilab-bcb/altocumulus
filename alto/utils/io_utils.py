@@ -173,17 +173,20 @@ def transfer_sample_sheet(
         raise PermissionError(f"Need read access to '{input_file}'!")
 
     if input_ext == ".csv":
-        df = pd.read_csv(input_file, sep=",",  header=None, index_col=False, nrows=nrows)
+        df = pd.read_csv(input_file, sep=",", header=None, index_col=False, nrows=nrows)
     elif input_ext == ".tsv":
-        df = pd.read_csv(input_file, sep="\t",  header=None, index_col=False, nrows=nrows)
+        df = pd.read_csv(input_file, sep="\t", header=None, index_col=False, nrows=nrows)
     else:
         assert input_ext == ".xlsx"
         df = pd.read_excel(input_file, header=None, index_col=False, nrows=nrows)
 
     if df.shape[0] >= nrows:
-        return input_file, is_changed # if can load nrows, the file is too large to be a sample sheet
+        return (
+            input_file,
+            is_changed,
+        )  # if can load nrows, the file is too large to be a sample sheet
 
-    df = df.applymap(lambda s: s.strip() if isinstance(s, str) else s) # only strip for strings
+    df = df.applymap(lambda s: s.strip() if isinstance(s, str) else s)  # only strip for strings
 
     flowcells = {}
     col_names = np.char.array(df.iloc[0, :], unicode=True).lower()
