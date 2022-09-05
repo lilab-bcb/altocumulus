@@ -191,7 +191,7 @@ def submit_to_cromwell(
     resp_dict = resp.json()
     successful_submission = resp.status_code == 201
     if successful_submission:
-        if time_out is not None:
+        if time_out is None:  # Only print this message when --time-out is not set.
             print(f"Job {resp_dict['id']} is submitted.")
     else:
         import sys
