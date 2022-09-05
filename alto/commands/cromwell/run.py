@@ -195,6 +195,7 @@ def submit_to_cromwell(
             print(f"Job {resp_dict['id']} is submitted.")
     else:
         import sys
+
         print(resp_dict["message"])
         sys.exit(-1)
 
