@@ -1,8 +1,0 @@
-firecloud
-matplotlib
-numpy
-openpyxl
-pandas
-python-dateutil
-six
-stratocumulus>=0.1.7
