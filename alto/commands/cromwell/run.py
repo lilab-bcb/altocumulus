@@ -191,14 +191,18 @@ def submit_to_cromwell(
     resp_dict = resp.json()
     successful_submission = resp.status_code == 201
     if successful_submission:
-        print(f"Job {resp_dict['id']} submitted.")
+        if time_out is not None:
+            print(f"Job {resp_dict['id']} is submitted.")
     else:
+        import sys
         print(resp_dict["message"])
+        sys.exit(-1)
 
     # Wait for job to complete
     if time_out is not None:
         status = wait_and_check(server, port, resp_dict["id"], time_out)
         print(f"{{\"job_id\": \"{resp_dict['id']}\", \"status\": \"{status}\"}}")
+
     if successful_submission:
         return resp_dict["id"]
 
