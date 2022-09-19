@@ -215,8 +215,8 @@ def transfer_sample_sheet(
                 if not os.path.exists(path):
                     raise ValueError(f"{path} does not exist!")
                 if not os.path.isdir(path):
-                    raise ValueError(f"{path} is not a folder!")
-                if not os.access(path, os.X_OK):
+                    break  # For file type Location values
+                elif not os.access(path, os.X_OK):
                     raise PermissionError(f"Need execution access to folder '{path}'!")
             else:
                 raise ValueError(f"{row[flowcell_keyword]} is not in string type!")
@@ -238,7 +238,7 @@ def transfer_sample_sheet(
             else:
                 flowcell.manager.update_samples(row[sample_keyword])
 
-    for _, row in df[1:].iterrows():
+    for idxr, row in df[1:].iterrows():
         for idxc, value in row.iteritems():
             if isinstance(value, str) and os.path.exists(value):
                 source = os.path.abspath(value)
@@ -257,7 +257,7 @@ def transfer_sample_sheet(
                     )
                     input_file_to_output_url[source] = sub_url
 
-                row[idxc] = sub_url
+                df.loc[idxr, idxc] = sub_url
                 is_changed = True
 
     if is_changed:
