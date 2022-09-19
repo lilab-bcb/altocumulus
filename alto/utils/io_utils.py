@@ -238,7 +238,7 @@ def transfer_sample_sheet(
             else:
                 flowcell.manager.update_samples(row[sample_keyword])
 
-    for _, row in df[1:].iterrows():
+    for idxr, row in df[1:].iterrows():
         for idxc, value in row.iteritems():
             if isinstance(value, str) and os.path.exists(value):
                 source = os.path.abspath(value)
@@ -257,7 +257,7 @@ def transfer_sample_sheet(
                     )
                     input_file_to_output_url[source] = sub_url
 
-                row[idxc] = sub_url
+                df.loc[idxr, idxc] = sub_url
                 is_changed = True
 
     if is_changed:
