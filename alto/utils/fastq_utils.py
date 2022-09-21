@@ -1,5 +1,5 @@
 import glob
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 from alto.utils import run_command
 
