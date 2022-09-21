@@ -116,7 +116,7 @@ def transfer_data(
                 source=source,
                 dest=dest,
                 backend=backend,
-                samples=flowcell.manager.get_samples(),
+                sample_map=flowcell.manager.get_sample_map(),
                 dry_run=dry_run,
                 profile=profile,
                 verbose=verbose,
@@ -236,7 +236,7 @@ def transfer_sample_sheet(
             if flowcell.type == "bcl":
                 flowcell.manager.update_lanes(row["lane"] if "lane" in row else "*")
             else:
-                flowcell.manager.update_samples(row[sample_keyword])
+                flowcell.manager.update_sample_map(row[sample_keyword])
 
     for idxr, row in df[1:].iterrows():
         for idxc, value in row.iteritems():
