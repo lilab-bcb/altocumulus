@@ -1,0 +1,2 @@
+graft alto
+prune alto/tests
