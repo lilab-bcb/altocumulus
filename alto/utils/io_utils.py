@@ -238,7 +238,7 @@ def transfer_sample_sheet(
             else:
                 flowcell.manager.update_sample_map(row[sample_keyword])
 
-    for idxr, row in (df[1:].iterrows() if input_ext != ".tsv" else df.iterrows()):
+    for idxr, row in df[1:].iterrows() if input_ext != ".tsv" else df.iterrows():
         for idxc, value in row.items():
             if isinstance(value, str) and os.path.exists(value):
                 source = os.path.abspath(value)
