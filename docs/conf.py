@@ -28,9 +28,9 @@ copyright = "2021 - 2022 Genentech, Inc. and the Broad Institute, Inc. All right
 author = "Bo Li, Yiming Yang, Rimte Rocher"
 
 # The short X.Y version
-version = "2.1"
+version = "2.2"
 # The full version, including alpha/beta/rc tags
-release = "2.1.2"
+release = "2.2.0"
 
 
 # -- General configuration ---------------------------------------------------

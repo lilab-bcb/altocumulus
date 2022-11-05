@@ -1,5 +1,12 @@
 .. role:: small
 
+Version 2.2.0 :small:`November 4, 2022`
+----------------------------------------
+
+* In ``cromwell run`` command, automatically create zip file on dependency WDLs for a local WDL workflow.
+* Remove ``query`` command.
+* Bug fix.
+
 Version 2.1.2 :small:`August 15, 2022`
 --------------------------------------
 
