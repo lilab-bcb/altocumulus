@@ -4,6 +4,7 @@ import json
 import tempfile
 from collections import namedtuple
 from typing import Dict, Optional, Tuple
+from urllib.parse import urlparse
 
 import numpy as np
 import pandas as pd
@@ -17,6 +18,13 @@ from .fastq_utils import path_is_fastq, sample_manager, transfer_fastq
 FlowcellType = namedtuple("FlowcellType", ["type", "manager"])
 
 import_pattern = '^import "(.+)"'
+
+
+def _get_scheme(path):
+    scheme = urlparse(path).scheme
+    return (
+        "file" if len(scheme) <= 1 else scheme
+    )  # for file paths: /foo/bar/test.h5ad or C:/foo/bar/test.h5ad
 
 
 def get_workflow_imports(path):

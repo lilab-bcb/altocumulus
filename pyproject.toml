@@ -10,17 +10,17 @@ requires = [
 name = "altocumulus"
 description = "Command line utilities for workflows on Terra or Cromwell"
 authors = [
-    {name = "Bo Li"},
-    {name = "Joshua Gould"},
-    {name = "Yiming Yang"},
-    {email = "cumulus-support@googlegroups.com"},
+    { name = "Bo Li" },
+    { name = "Joshua Gould" },
+    { name = "Yiming Yang" },
+    { email = "cumulus-support@googlegroups.com" },
 ]
-license = {file = "LICENSE"}
-readme = {file = "README.rst", content-type = "text/x-rst"}
+license = { file = "LICENSE" }
+readme = { file = "README.rst", content-type = "text/x-rst" }
 requires-python = ">=3.8"
 dynamic = ["version"]
 keywords = ["Terra", "Cromwell"]
-classifiers=[  # https://pypi.python.org/pypi?%3Aaction=list_classifiers
+classifiers = [# https://pypi.python.org/pypi?%3Aaction=list_classifiers
     "License :: OSI Approved :: BSD License",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
@@ -36,6 +36,7 @@ classifiers=[  # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 ]
 dependencies = [
     "firecloud",
+    "fsspec",
     "matplotlib",
     "numpy",
     "openpyxl",
