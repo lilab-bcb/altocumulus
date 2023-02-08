@@ -40,7 +40,8 @@ def parse_firecloud_workflow(workflow_string: str) -> Tuple[str, str, int]:
 def get_firecloud_workflow(
     method_namespace: str, method_name: str, method_version: int = None
 ) -> dict:
-    """Locate a workflow using the method_namespace, method_name and method_version hierachy and return results in a dictionary.
+    """Locate a workflow using the method_namespace, method_name and method_version hierachy and
+    return results in a dictionary.
 
     Parameters
     ----------
@@ -99,7 +100,7 @@ def get_firecloud_workflow(
 
 
 def parse_workspace(workspace: str) -> Tuple[str, str]:
-    """Parse a workspace string"""
+    """Parse a workspace string."""
     fields = workspace.split("/")
     if len(fields) != 2:
         raise ValueError(f"workspace {workspace} is not in the right format!")
@@ -123,7 +124,10 @@ def update_workflow_config_in_workspace(
     workspace_namespace: str,
     workspace_name: str,
 ):
-    """Update workflow configuration in the given workspace. If config does not exist, create one."""
+    """Update workflow configuration in the given workspace.
+
+    If config does not exist, create one.
+    """
     config_exists = fapi.get_workspace_config(
         workspace_namespace, workspace_name, config_namespace, config_name
     )

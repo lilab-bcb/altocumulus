@@ -17,14 +17,14 @@ from alto.utils import (
 
 
 def detect_workflow_source(workflow_string: str) -> str:
-    """Detect if a workflow is from Dockerstore or Broad Methods Repository"""
+    """Detect if a workflow is from Dockerstore or Broad Methods Repository."""
     if workflow_string.find(":") >= 0:
         return "Dockstore"
     return "Broad Methods Repository"
 
 
 def convert_inputs(inputs: dict) -> dict:
-    """Convert elements in the dictionary loaded by json to formats that Terra accepts as inputs"""
+    """Convert elements in the dictionary loaded by json to formats that Terra accepts as inputs."""
     results = {}
     for key, value in inputs.items():
         if isinstance(value, bool):
@@ -52,7 +52,8 @@ def submit_to_terra(
     bucket_folder: str = None,
     use_callcache: bool = True,
 ) -> str:
-    """Submit a workflow to Terra. The workflow can from either Dockstore or Broad Methods Repository.
+    """Submit a workflow to Terra. The workflow can from either Dockstore or Broad Methods
+    Repository.
 
     Parameters
     ----------

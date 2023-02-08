@@ -46,7 +46,8 @@ def get_dockstore_workflow(
     version: str = None,
     ssl_verify: bool = True,
 ) -> dict:
-    """Locate a workflow using the organization, collection and workflow hierachy and return results in a dictionary.
+    """Locate a workflow using the organization, collection and workflow hierachy and return results
+    in a dictionary.
 
     Parameters
     ----------
