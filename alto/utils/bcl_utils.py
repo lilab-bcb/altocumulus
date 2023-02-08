@@ -45,7 +45,7 @@ def transfer_flowcell(
     profile: Optional[str] = None,
     verbose: bool = True,
 ) -> None:
-    """Transfer one flowcell (with selected lanes) to cloud
+    """Transfer one flowcell (with selected lanes) to cloud.
 
     Parameters
     ----------

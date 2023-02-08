@@ -100,8 +100,8 @@ def transfer_data(
     verbose: bool = True,
 ) -> None:
     """Transfer source to dest (cloud destination).
-    backend, choosing from gcp and aws.
-    flowcells is a global flowcell manangement object.
+
+    backend, choosing from gcp and aws. flowcells is a global flowcell manangement object.
     """
     if verbose:
         print(f'{"Dry run: " if dry_run else ""}Uploading {source} to {dest}.')
