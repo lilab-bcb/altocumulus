@@ -1,7 +1,7 @@
 import sys
 import argparse
 
-from . import abort, check_status, get_logs, get_metadata, list_jobs, run
+from . import abort, check_status, get_logs, get_metadata, list_jobs, run, timing
 
 
 def main(args):
@@ -12,13 +12,14 @@ def main(args):
         "get_metadata": get_metadata,
         "get_logs": get_logs,
         "list_jobs": list_jobs,
+        "timing": timing,
     }
 
     parser = argparse.ArgumentParser(description="Run a terra sub-command.")
     parser.add_argument(
         "subcommand",
         help="The sub-command",
-        choices=["run", "check_status", "abort", "get_metadata", "get_logs", "list_jobs"],
+        choices=["run", "check_status", "abort", "get_metadata", "get_logs", "list_jobs", "timing"],
     )
     parser.add_argument(
         "subcommand_args", help="The sub-command arguments", nargs=argparse.REMAINDER
