@@ -8,17 +8,15 @@ def get_timing(server, port, job_id, output_file):
 
     if resp.status_code == 200:
         if output_file is None:
-            output_file = job_id + '.html'
-        with open(output_file, 'wt') as out:
+            output_file = job_id + ".html"
+        with open(output_file, "wt") as out:
             out.write(resp.text)
     else:
-        print('Invalid response from server')
+        print("Invalid response from server")
 
 
 def main(argv):
-    parser = argparse.ArgumentParser(
-        description="Get a visual diagram of a running workflow."
-    )
+    parser = argparse.ArgumentParser(description="Get a visual diagram of a running workflow.")
     parser.add_argument(
         "-s",
         "--server",
