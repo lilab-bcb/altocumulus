@@ -43,7 +43,7 @@ dependencies = [
     "pandas",
     "python-dateutil",
     "six",
-    "stratocumulus>=0.1.7",
+    "stratocumulus>=0.2.0",
 ]
 
 [project.scripts]
