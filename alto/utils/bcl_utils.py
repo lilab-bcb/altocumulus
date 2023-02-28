@@ -39,7 +39,6 @@ def path_is_bcl(path: str) -> bool:
 def transfer_flowcell(
     source: str,
     dest: str,
-    backend: str,
     lanes: List[str],
     dry_run: bool,
     profile: Optional[str] = None,
@@ -53,8 +52,6 @@ def transfer_flowcell(
         Local path to the flowcell directory.
     dest: `str`
         Cloud address to copy the flowcell to. For example, it should be something like 'gs://my_bucket/flowecell' for copying to Google bucket.
-    backend: `str`
-        Cloud backend, choosing from 'gcp' and 'aws'.
     lanes: `List[str]`
         A list of lanes to copy to cloud.
     dry_run: `bool`
@@ -75,8 +72,6 @@ def transfer_flowcell(
     strato_cmd = [
         "strato",
         "cp",
-        "--backend",
-        backend,
         "--ionice",
         "--quiet",
         f"{source}/RunInfo.xml",
@@ -93,8 +88,6 @@ def transfer_flowcell(
     strato_cmd = [
         "strato",
         "cp",
-        "--backend",
-        backend,
         "--ionice",
         "--quiet",
         f"{source}/RTAComplete.txt",
@@ -108,8 +101,6 @@ def transfer_flowcell(
         strato_cmd = [
             "strato",
             "cp",
-            "--backend",
-            backend,
             "--ionice",
             "--quiet",
             f"{source}/runParameters.xml",
@@ -119,8 +110,6 @@ def transfer_flowcell(
         strato_cmd = [
             "strato",
             "cp",
-            "--backend",
-            backend,
             "--ionice",
             "--quiet",
             f"{source}/RunParameters.xml",
@@ -146,8 +135,6 @@ def transfer_flowcell(
         strato_cmd = [
             "strato",
             "sync",
-            "--backend",
-            backend,
             "--ionice",
             "-m",
             "--quiet",
@@ -164,8 +151,6 @@ def transfer_flowcell(
         strato_cmd = [
             "strato",
             "cp",
-            "--backend",
-            backend,
             "--ionice",
             "--quiet",
             locs_string.format(source),
@@ -180,8 +165,6 @@ def transfer_flowcell(
             strato_cmd = [
                 "strato",
                 "sync",
-                "--backend",
-                backend,
                 "--ionice",
                 "-m",
                 "--quiet",

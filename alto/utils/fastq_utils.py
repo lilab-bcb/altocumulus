@@ -25,7 +25,6 @@ def path_is_fastq(path: str) -> bool:
 def transfer_fastq(
     source: str,
     dest: str,
-    backend: str,
     sample_map: Dict[str, List[str]],
     dry_run: bool,
     profile: Optional[str] = None,
@@ -38,8 +37,6 @@ def transfer_fastq(
                 strato_cmd = [
                     "strato",
                     "cp",
-                    "--backend",
-                    backend,
                     "--ionice",
                     "-m",
                     "--quiet",
@@ -50,8 +47,6 @@ def transfer_fastq(
                 strato_cmd = [
                     "strato",
                     "sync",
-                    "--backend",
-                    backend,
                     "--ionice",
                     "-m",
                     "--quiet",
@@ -65,8 +60,6 @@ def transfer_fastq(
             strato_cmd = [
                 "strato",
                 "cp",
-                "--backend",
-                backend,
                 "--ionice",
                 "-m",
                 "--quiet",
