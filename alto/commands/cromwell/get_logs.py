@@ -18,9 +18,9 @@ def get_localize_path(cloud_uri, job_id):
 
 
 def get_remote_log_file(cloud_uri, job_id, profile):
-    backend, local_path = get_localize_path(cloud_uri, job_id)
+    _, local_path = get_localize_path(cloud_uri, job_id)
     try:
-        strato_cmd = ["strato", "cp", "--backend", backend, "--quiet", cloud_uri, local_path]
+        strato_cmd = ["strato", "cp", "--quiet", cloud_uri, local_path]
         if profile is not None:
             strato_cmd.extend(["--profile", profile])
         run_command(strato_cmd, dry_run=False)

@@ -93,7 +93,6 @@ class cloud_url_factory:  # class to make sure all cloud urls are unique
 def transfer_data(
     source: str,
     dest: str,
-    backend: str,
     dry_run: bool,
     flowcells: Dict[str, FlowcellType] = None,
     profile: Optional[str] = None,
@@ -112,7 +111,6 @@ def transfer_data(
             transfer_flowcell(
                 source=source,
                 dest=dest,
-                backend=backend,
                 lanes=flowcell.manager.get_lanes(),
                 dry_run=dry_run,
                 profile=profile,
@@ -123,7 +121,6 @@ def transfer_data(
             transfer_fastq(
                 source=source,
                 dest=dest,
-                backend=backend,
                 sample_map=flowcell.manager.get_sample_map(),
                 dry_run=dry_run,
                 profile=profile,
@@ -134,8 +131,6 @@ def transfer_data(
             strato_cmd = [
                 "strato",
                 "sync",
-                "--backend",
-                backend,
                 "--ionice",
                 "-m",
                 "--quiet",
@@ -143,7 +138,7 @@ def transfer_data(
                 dest,
             ]
         else:
-            strato_cmd = ["strato", "cp", "--backend", backend, "--ionice", "--quiet", source, dest]
+            strato_cmd = ["strato", "cp", "--ionice", "--quiet", source, dest]
 
         if profile is not None:
             strato_cmd.extend(["--profile", profile])
@@ -153,7 +148,6 @@ def transfer_data(
 def transfer_sample_sheet(
     input_file: str,
     input_ext: str,
-    backend: str,
     input_file_to_output_url: dict,
     url_gen: cloud_url_factory,
     dry_run: bool,
@@ -164,7 +158,6 @@ def transfer_sample_sheet(
     """Check sample sheet and upload files inside it.
     input_file: sample sheet
     input_ext: input file extension, either '.xlsx', '.tsv', or '.csv'
-    backend: choosing from 'gcp' and 'aws'
     input_file_to_output_url: global dictionary maps local files to cloud urls
     url_gen: cloud url factory to make sure no duplicated cloud urls
     dry_run: if dry run
@@ -257,7 +250,6 @@ def transfer_sample_sheet(
                     transfer_data(
                         source=source,
                         dest=sub_url,
-                        backend=backend,
                         dry_run=dry_run,
                         flowcells=flowcells,
                         profile=profile,
@@ -349,7 +341,6 @@ def upload_to_cloud_bucket(
                 input_path, is_changed = transfer_sample_sheet(
                     input_file=input_path,
                     input_ext=input_path_extension,
-                    backend=backend,
                     input_file_to_output_url=input_file_to_output_url,
                     url_gen=url_gen,
                     dry_run=dry_run,
@@ -361,7 +352,6 @@ def upload_to_cloud_bucket(
             transfer_data(
                 source=input_path,
                 dest=input_url,
-                backend=backend,
                 dry_run=dry_run,
                 profile=profile,
                 verbose=verbose,
