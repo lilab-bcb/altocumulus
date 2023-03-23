@@ -2,8 +2,8 @@ import argparse
 from pathlib import Path
 
 import fsspec
-import matplotlib.pyplot as plt
 import pandas as pd
+import matplotlib.pyplot as plt
 from dateutil.parser import parse
 
 from alto.utils.io_utils import _get_scheme
@@ -65,16 +65,16 @@ def execute(input_path, report_filename, plot_filename=None):
             details=generate_plot,
         )
         if task is not None:
-            result['task'] = task
-            result['shard'] = shard
+            result["task"] = task
+            result["shard"] = shard
 
         if generate_plot:
             ax = axes[i]
             plot_single_task(result, ax)
-        del result['details']
+        del result["details"]
 
         results.append(result)
-    pd.DataFrame(results).to_csv(report_filename, sep='\t', index=False)
+    pd.DataFrame(results).to_csv(report_filename, sep="\t", index=False)
     if generate_plot:
         fig.tight_layout()
         fig.savefig(plot_filename)
@@ -96,10 +96,10 @@ def get_task_and_shard(log_path):
 
     else:
         task_name = shard_name
-        shard_name = ''
+        shard_name = ""
 
     if task_name.startswith("call-"):
-        task_name = task_name[len("call-"):]
+        task_name = task_name[len("call-") :]
     # gs://output/cromwell_execution/xxx_workflow/92f48dc5-6/call-xxx_task/shard-0/monitoring.log
     # gs://output/cromwell_execution/xxx_workflow/92f48dc5-6/call-xxx_task/shard-0/cacheCopy/monitoring.log
     return task_name, shard_name
@@ -128,47 +128,57 @@ def parse_log(path, details=True) -> dict:
                 # e.g. [Tue Jan 24 17:34:29 UTC 2023]
                 times.append(parse(line[1:-1]))
             if line.startswith("* CPU usage:"):
-                value = float(line[line.index(":") + 1: len(line) - 1])
+                value = float(line[line.index(":") + 1 : len(line) - 1])
                 if details:
                     cpu_values.append(value)
                 max_cpu_percent = max(max_cpu_percent, value)
             elif line.startswith("* Memory usage:"):
-                value = float(line[line.index(":") + 1: len(line) - 1])
+                value = float(line[line.index(":") + 1 : len(line) - 1])
                 if details:
                     memory_values.append(value)
                 max_memory_percent = max(max_memory_percent, value)
             elif line.startswith("* Disk usage:"):
-                value = float(line[line.index(":") + 1: len(line) - 1])
+                value = float(line[line.index(":") + 1 : len(line) - 1])
                 if details:
                     disk_values.append(value)
                 max_disk_percent = max(max_disk_percent, value)
             elif line.startswith("#CPU"):
-                cpus = int(line[line.index(":") + 1: len(line)])
+                cpus = int(line[line.index(":") + 1 : len(line)])
             elif line.startswith("Total Memory:"):
-                total_memory = float(line[line.index(":") + 1: len(line) - 1])
+                total_memory = float(line[line.index(":") + 1 : len(line) - 1])
             elif line.startswith("Total Disk space:"):
-                total_disk = float(line[line.index(":") + 1: len(line) - 1])
+                total_disk = float(line[line.index(":") + 1 : len(line) - 1])
     if len(times) >= 2:
         elapsed_minutes = ((times[-1] - times[0]).total_seconds()) / 60
 
-    return dict(max_memory_percent=max_memory_percent, max_cpu_percent=max_cpu_percent,
-                max_disk_percent=max_disk_percent, cpus=cpus, total_memory=total_memory, total_disk=total_disk,
-                elapsed_minutes=elapsed_minutes,
-                details=dict(times=times, cpu=cpu_values, memory=memory_values, disk=disk_values))
+    return dict(
+        max_memory_percent=max_memory_percent,
+        max_cpu_percent=max_cpu_percent,
+        max_disk_percent=max_disk_percent,
+        cpus=cpus,
+        total_memory=total_memory,
+        total_disk=total_disk,
+        elapsed_minutes=elapsed_minutes,
+        details=dict(times=times, cpu=cpu_values, memory=memory_values, disk=disk_values),
+    )
 
 
 def plot_single_task(result, ax):
-    cpu_str = "{:.0f}/{} ({:.0f}%)".format(result['max_cpu_percent'] / 100 * result['cpus'], result['cpus'],
-                                           result['max_cpu_percent'])
+    cpu_str = "{:.0f}/{} ({:.0f}%)".format(
+        result["max_cpu_percent"] / 100 * result["cpus"], result["cpus"], result["max_cpu_percent"]
+    )
     memory_str = "{:.1f}/{:.1f} ({:.0f}%)".format(
-        result['max_memory_percent'] / 100 * result['total_memory'], result['total_memory'],
-        result['max_memory_percent']
+        result["max_memory_percent"] / 100 * result["total_memory"],
+        result["total_memory"],
+        result["max_memory_percent"],
     )
     disk_str = "{:.0f}/{:.0f} ({:.0f}%)".format(
-        result['max_disk_percent'] / 100 * result['total_disk'], result['total_disk'], result['max_disk_percent']
+        result["max_disk_percent"] / 100 * result["total_disk"],
+        result["total_disk"],
+        result["max_disk_percent"],
     )
-    details = result['details']
-    times = details['times']
+    details = result["details"]
+    times = details["times"]
     # convert times to elapsed times in minutes
     if len(times) >= 2:
         start_time = times[0]
@@ -178,16 +188,16 @@ def plot_single_task(result, ax):
             new_times.append(delta.total_seconds() / 60.0)
 
         times = new_times
-        task_name = result.get('task')
-        shard = result.get('shard')
+        task_name = result.get("task")
+        shard = result.get("shard")
         if task_name is not None:
             title = task_name
             if shard is not None:
-                title = f'{title} ({shard})'
+                title = f"{title} ({shard})"
             ax.set_title(title)
-        cpu_values = details['cpu']
-        memory_values = details['memory']
-        disk_values = details['disk']
+        cpu_values = details["cpu"]
+        memory_values = details["memory"]
+        disk_values = details["disk"]
         ax.plot(times, cpu_values, label="CPU, " + cpu_str)
         ax.plot(times, memory_values, label="Memory, " + memory_str)
         ax.plot(times, disk_values, label="Disk, " + disk_str)
