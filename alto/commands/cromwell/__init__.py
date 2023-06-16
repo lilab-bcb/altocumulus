@@ -20,7 +20,16 @@ def main(args):
     parser.add_argument(
         "subcommand",
         help="The sub-command",
-        choices=["run", "check_status", "abort", "get_metadata", "get_task_status", "get_logs", "list_jobs", "timing"],
+        choices=[
+            "run",
+            "check_status",
+            "abort",
+            "get_metadata",
+            "get_task_status",
+            "get_logs",
+            "list_jobs",
+            "timing",
+        ],
     )
     parser.add_argument(
         "subcommand_args", help="The sub-command arguments", nargs=argparse.REMAINDER
