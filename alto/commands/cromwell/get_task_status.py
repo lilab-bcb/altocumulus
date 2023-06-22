@@ -51,9 +51,7 @@ class JobIDFetcher:
 
 
 def main(argv):
-    parser = argparse.ArgumentParser(
-        description="Get workflow and call-level metadata for a submitted job."
-    )
+    parser = argparse.ArgumentParser(description="Get status of all WDL tasks of a job.")
     parser.add_argument(
         "-s",
         "--server",
