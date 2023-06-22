@@ -326,6 +326,40 @@ to see the usage information::
     alto cromwell get_metadata -s my-server.com --id 710ec6d3-882c-469c-8092-a0b9d5f8dd90
 
 
+``alto cromwell get_task_status``
+--------------------------------------------------------------------------------------------------------------------------------
+
+Get status of all WDL tasks of a job.
+
+Type::
+
+    alto cromwell get_task_status -h
+
+to see the usage information::
+
+    Usage:
+        alto cromwell get_task_status [-h] -s SERVER [-p PORT] --id JOB_ID
+
+* Options:
+
+    -s SERVER, -\-server SERVER
+        Server hostname or IP address.
+    -p PORT, -\-port PORT
+        Port number for Cromwell service. The default port is ``8000``.
+    -\-id JOB_ID
+        Workflow ID returned in **alto cromwell run** command.
+    -h, -\-help
+        Show this help message and exit
+
+* Outputs:
+
+    A local file named ``<job-id>.task_status.json`` will be created with the job's task status info in JSON format, where *<job-id>* is the job's ID specified.
+
+* Examples::
+
+    alto cromwell get_task_status -s my-server.com --id 710ec6d3-882c-469c-8092-a0b9d5f8dd90
+
+
 ``alto cromwell get_logs``
 --------------------------------------------------------------------------------------------------------------------------------
 

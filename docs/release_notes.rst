@@ -1,5 +1,10 @@
 .. role:: small
 
+Version 2.3.0 :small:`June 21, 2023`
+----------------------------------------
+
+* Add ``cromwell get_task_status`` command to get a summary JSON file on the status of all WDL tasks of a job.
+
 Version 2.2.0 :small:`November 4, 2022`
 ----------------------------------------
 
