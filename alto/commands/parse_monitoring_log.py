@@ -59,7 +59,8 @@ def execute(input_path, report_filename, plot_filename=None):
     results = []
     for i in range(len(log_paths)):
         log_path = log_paths[i]
-        task, shard = get_task_and_shard(log_path) if is_dir else None
+
+        task, shard = get_task_and_shard(log_path) if is_dir else None, None
         result = parse_log(
             scheme + "://" + log_path,
             details=generate_plot,
