@@ -44,7 +44,7 @@ def execute(input_path, report_filename, plot_filename=None):
     is_dir = fs.isdir(input_path)
     if is_dir:
         input_path = input_path.rstrip(fs.sep)
-        log_paths = fs.glob(input_path + f"{fs.sep}**{fs.sep}monitoring.log", recursive=True)
+        log_paths = fs.glob(f"{input_path}{fs.sep}**{fs.sep}monitoring.log")
         if len(log_paths) == 0:
             raise ValueError("No monitoring.log files found")
     else:
