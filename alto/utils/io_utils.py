@@ -187,7 +187,7 @@ def transfer_sample_sheet(
             is_changed,
         )  # if can load nrows, the file is too large to be a sample sheet
 
-    df = df.applymap(lambda s: s.strip() if isinstance(s, str) else s)  # only strip for strings
+    df = df.map(lambda s: s.strip() if isinstance(s, str) else s)  # only strip for strings
 
     flowcells = {}
     col_names = np.char.array(df.iloc[0, :], unicode=True).lower()
