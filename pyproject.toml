@@ -40,7 +40,7 @@ dependencies = [
     "matplotlib",
     "numpy",
     "openpyxl",
-    "pandas",
+    "pandas>=2.1.0",
     "python-dateutil",
     "six",
     "stratocumulus>=0.2.0",
