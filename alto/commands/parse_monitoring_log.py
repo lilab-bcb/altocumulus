@@ -88,7 +88,7 @@ def _figsize(nrow=1, ncol=1, aspect=1, size=3):
 def get_task_and_shard(log_path):
     p = Path(log_path)
     shard_name = p.parent.name
-    if shard_name == "cacheCopy" or shard_name.startswith("attempt-"):
+    if shard_name == "cacheCopy" or shard_name.startswith("attempt-") or shard_name == 'execution':
         p = p.parent
         shard_name = p.parent.name
 
