@@ -88,7 +88,7 @@ def _figsize(nrow=1, ncol=1, aspect=1, size=3):
 def get_task_and_shard(log_path):
     p = Path(log_path)
     shard_name = p.parent.name
-    if shard_name == "cacheCopy" or shard_name.startswith("attempt-"):
+    if shard_name == "cacheCopy" or shard_name.startswith("attempt-") or shard_name == "execution":
         p = p.parent
         shard_name = p.parent.name
 
@@ -139,16 +139,20 @@ def parse_log(path, details=True) -> dict:
                     memory_values.append(value)
                 max_memory_percent = max(max_memory_percent, value)
             elif line.startswith("* Disk usage:"):
-                value = float(line[line.index(":") + 1 : len(line) - 1])
-                if details:
-                    disk_values.append(value)
-                max_disk_percent = max(max_disk_percent, value)
+                value = line[line.index(":") + 1 : len(line) - 1]
+                if value != "":
+                    value = float(value)
+                    if details:
+                        disk_values.append(value)
+                    max_disk_percent = max(max_disk_percent, value)
             elif line.startswith("#CPU"):
                 cpus = int(line[line.index(":") + 1 : len(line)])
             elif line.startswith("Total Memory:"):
                 total_memory = float(line[line.index(":") + 1 : len(line) - 1])
             elif line.startswith("Total Disk space:"):
-                total_disk = float(line[line.index(":") + 1 : len(line) - 1])
+                value = line[line.index(":") + 1 : len(line) - 1]
+                if value != "":
+                    total_disk = float(value)
     if len(times) >= 2:
         elapsed_minutes = ((times[-1] - times[0]).total_seconds()) / 60
 
