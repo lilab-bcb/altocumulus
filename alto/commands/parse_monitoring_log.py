@@ -88,19 +88,18 @@ def _figsize(nrow=1, ncol=1, aspect=1, size=3):
 def get_task_and_shard(log_path):
     p = Path(log_path)
     shard_name = p.parent.name
-    if shard_name == "cacheCopy" or shard_name.startswith("attempt-") or shard_name == "execution":
+    if shard_name.startswith("attempt-") or shard_name in ("execution", "cacheCopy",  "work"):
         p = p.parent
         shard_name = p.parent.name
 
     if shard_name.startswith("shard-"):
         task_name = p.parent.parent.name
-
     else:
         task_name = shard_name
         shard_name = ""
 
     if task_name.startswith("call-"):
-        task_name = task_name[len("call-") :]
+        task_name = task_name[len("call-"):]
     # gs://output/cromwell_execution/xxx_workflow/92f48dc5-6/call-xxx_task/shard-0/monitoring.log
     # gs://output/cromwell_execution/xxx_workflow/92f48dc5-6/call-xxx_task/shard-0/cacheCopy/monitoring.log
     return task_name, shard_name
@@ -129,28 +128,28 @@ def parse_log(path, details=True) -> dict:
                 # e.g. [Tue Jan 24 17:34:29 UTC 2023]
                 times.append(parse(line[1:-1]))
             if line.startswith("* CPU usage:"):
-                value = float(line[line.index(":") + 1 : len(line) - 1])
+                value = float(line[line.index(":") + 1: len(line) - 1])
                 if details:
                     cpu_values.append(value)
                 max_cpu_percent = max(max_cpu_percent, value)
             elif line.startswith("* Memory usage:"):
-                value = float(line[line.index(":") + 1 : len(line) - 1])
+                value = float(line[line.index(":") + 1: len(line) - 1])
                 if details:
                     memory_values.append(value)
                 max_memory_percent = max(max_memory_percent, value)
             elif line.startswith("* Disk usage:"):
-                value = line[line.index(":") + 1 : len(line) - 1]
+                value = line[line.index(":") + 1: len(line) - 1]
                 if value != "":
                     value = float(value)
                     if details:
                         disk_values.append(value)
                     max_disk_percent = max(max_disk_percent, value)
             elif line.startswith("#CPU"):
-                cpus = int(line[line.index(":") + 1 : len(line)])
+                cpus = int(line[line.index(":") + 1: len(line)])
             elif line.startswith("Total Memory:"):
-                total_memory = float(line[line.index(":") + 1 : len(line) - 1])
+                total_memory = float(line[line.index(":") + 1: len(line) - 1])
             elif line.startswith("Total Disk space:"):
-                value = line[line.index(":") + 1 : len(line) - 1]
+                value = line[line.index(":") + 1: len(line) - 1]
                 if value != "":
                     total_disk = float(value)
     if len(times) >= 2:
