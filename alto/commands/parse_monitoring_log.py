@@ -59,13 +59,12 @@ def execute(input_path, report_filename, plot_filename=None):
     results = []
     for i in range(len(log_paths)):
         log_path = log_paths[i]
-
-        task, shard = get_task_and_shard(log_path) if is_dir else None, None
         result = parse_log(
             scheme + "://" + log_path,
             details=generate_plot,
         )
-        if task is not None:
+        if is_dir:
+            task, shard = get_task_and_shard(log_path)
             result["task"] = task
             result["shard"] = shard
 
@@ -88,13 +87,12 @@ def _figsize(nrow=1, ncol=1, aspect=1, size=3):
 def get_task_and_shard(log_path):
     p = Path(log_path)
     shard_name = p.parent.name
-    if shard_name == "cacheCopy" or shard_name.startswith("attempt-") or shard_name == "execution":
+    if shard_name.startswith("attempt-") or shard_name in ("execution", "cacheCopy", "work"):
         p = p.parent
         shard_name = p.parent.name
 
     if shard_name.startswith("shard-"):
         task_name = p.parent.parent.name
-
     else:
         task_name = shard_name
         shard_name = ""
