@@ -91,7 +91,7 @@ def get_task_and_shard(log_path):
         p = p.parent
         shard_name = p.parent.name
 
-    if shard_name.startswith("shard-"):
+    if shard_name.startswith("shard-") or shard_name.isdigit():
         task_name = p.parent.parent.name
     else:
         task_name = shard_name
@@ -99,8 +99,11 @@ def get_task_and_shard(log_path):
 
     if task_name.startswith("call-"):
         task_name = task_name[len("call-") :]
+    elif task_name.endswith("_monitoring_log"):
+        task_name = task_name[: -len("_monitoring_log")]
     # gs://output/cromwell_execution/xxx_workflow/92f48dc5-6/call-xxx_task/shard-0/monitoring.log
     # gs://output/cromwell_execution/xxx_workflow/92f48dc5-6/call-xxx_task/shard-0/cacheCopy/monitoring.log
+    # aws-omics: task_monitoring_log/0/monitoring.log
     return task_name, shard_name
 
 
