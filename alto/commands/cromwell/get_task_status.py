@@ -19,8 +19,10 @@ class JobIDFetcher:
         for task_name in metadata.keys():
             if "jobId" in metadata[task_name][0]:
                 jobID_status = self.get_jobID(task_name, metadata[task_name])
-            else:
+            elif "subWorkflowId" in metadata[task_name][0]:
                 jobID_status = self.subworkflow_IDs(metadata[task_name])
+            else:
+                jobID_status = self.get_cached_status(task_name, metadata[task_name])
             self.workflow_jobs.update(jobID_status)
         return self.workflow_jobs
 
@@ -44,10 +46,19 @@ class JobIDFetcher:
                         subworkflow_status[key][key_temp] = value_temp
         return subworkflow_status
 
+    def get_cached_status(self, task_name, task_metadata):
+        cached_status = []
+        task_status = {}
+        for job in task_metadata:
+            cached_status.append(job["executionStatus"])
+        task_status[task_name] = {"cached": cached_status}
+        return task_status
+
     def get_task_status(self, job_id):  # returns a json file with the results
         self.get_workflow_status(job_id)
-        with open(f"{job_id}.task_status.json", "w") as fp:
-            json.dump(self.workflow_jobs, fp, indent=4)
+        print(json.dumps(self.workflow_jobs, indent=4))
+        #with open(f"{job_id}.task_status.json", "w") as fp:
+        #    json.dump(self.workflow_jobs, fp, indent=4)
 
 
 def main(argv):
