@@ -121,7 +121,7 @@ def transfer_data(
             transfer_fastq(
                 source=source,
                 dest=dest,
-                sample_map=flowcell.manager.get_sample_map(),
+                sample_set=flowcell.manager.get_sample_set(),
                 dry_run=dry_run,
                 profile=profile,
                 verbose=verbose,
@@ -131,7 +131,7 @@ def transfer_data(
             transfer_tar(
                 source=source,
                 dest=dest,
-                sample_map=flowcell.manager.get_sample_map(),
+                sample_set=flowcell.manager.get_sample_set(),
                 dry_run=dry_run,
                 profile=profile,
                 verbose=verbose,
@@ -250,7 +250,7 @@ def transfer_sample_sheet(
                 flowcell.manager.update_lanes(row["lane"] if "lane" in row else "*")
             else:
                 # FASTQ or TAR
-                flowcell.manager.update_sample_map(row[sample_keyword])
+                flowcell.manager.update_sample_set(row[sample_keyword])
 
     for idxr, row in df[1:].iterrows() if input_ext != ".tsv" else df.iterrows():
         for idxc, value in row.items():
