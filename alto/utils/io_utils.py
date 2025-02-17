@@ -13,6 +13,7 @@ from alto.utils import prefix_float, run_command
 
 from .bcl_utils import lane_manager, path_is_bcl, transfer_flowcell
 from .fastq_utils import path_is_fastq, sample_manager, transfer_fastq
+from .tar_utils import path_is_tar, sample_manager, transfer_tar
 
 
 FlowcellType = namedtuple("FlowcellType", ["type", "manager"])
@@ -116,12 +117,21 @@ def transfer_data(
                 profile=profile,
                 verbose=verbose,
             )
-        else:
-            assert flowcell.type == "fastq"
+        elif flowcell.type == "fastq":
             transfer_fastq(
                 source=source,
                 dest=dest,
-                sample_map=flowcell.manager.get_sample_map(),
+                sample_set=flowcell.manager.get_sample_set(),
+                dry_run=dry_run,
+                profile=profile,
+                verbose=verbose,
+            )
+        else:
+            assert flowcell.type == "tar"
+            transfer_tar(
+                source=source,
+                dest=dest,
+                sample_set=flowcell.manager.get_sample_set(),
                 dry_run=dry_run,
                 profile=profile,
                 verbose=verbose,
@@ -230,6 +240,8 @@ def transfer_sample_sheet(
                     flowcell = FlowcellType(type="bcl", manager=lane_manager())
                 elif path_is_fastq(path):
                     flowcell = FlowcellType(type="fastq", manager=sample_manager())
+                elif path_is_tar(path):
+                    flowcell = FlowcellType(type="tar", manager=sample_manager())
                 else:
                     raise ValueError(f"{path} is neither a BCL folder nor a FASTQ folder!")
                 flowcells[path] = flowcell
@@ -237,7 +249,8 @@ def transfer_sample_sheet(
             if flowcell.type == "bcl":
                 flowcell.manager.update_lanes(row["lane"] if "lane" in row else "*")
             else:
-                flowcell.manager.update_sample_map(row[sample_keyword])
+                # FASTQ or TAR
+                flowcell.manager.update_sample_set(row[sample_keyword])
 
     for idxr, row in df[1:].iterrows() if input_ext != ".tsv" else df.iterrows():
         for idxc, value in row.items():
