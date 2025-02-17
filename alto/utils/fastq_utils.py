@@ -42,7 +42,7 @@ def transfer_fastq(
                 f"{source}/{sample}_*.fastq.gz",
                 dest + "/",
             ]
-        elif len(glob.glob(f"{source}/{sample}/{sample}_*.fastq.gz")) > 0:
+        elif len(glob.glob(f"{source}/{sample}/{sample}_*.fastq.gz")) > 0:   # TODO: Check naming convention before upload
             strato_cmd = [
                 "strato",
                 "sync",
