@@ -1,6 +1,6 @@
 import os
 import glob
-from typing import Set, List, Optional
+from typing import List, Optional, Set
 
 from alto.utils import run_command
 
@@ -22,6 +22,7 @@ class sample_manager:
 def path_is_tar(path: str) -> bool:
     return len(glob.glob(f"{path}/*.tar")) > 0
 
+
 def transfer_tar(
     source: str,
     dest: str,
@@ -31,7 +32,7 @@ def transfer_tar(
     verbose: bool = True,
 ) -> None:
     for sample in sample_set:
-        tar_list = glob.glob(f"{source}/{sample}.tar")   # TAR filename must be "<sample>.tar"
+        tar_list = glob.glob(f"{source}/{sample}.tar")  # TAR filename must be "<sample>.tar"
         if len(tar_list) == 0:
             raise ValueError(f"'{sample}' doesn't have any corresponding TAR file in {source}!")
         elif len(tar_list) > 1:
