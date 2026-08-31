@@ -57,7 +57,7 @@ class JobIDFetcher:
     def get_task_status(self, job_id):  # returns a json file with the results
         self.get_workflow_status(job_id)
         print(json.dumps(self.workflow_jobs, indent=4))
-        #with open(f"{job_id}.task_status.json", "w") as fp:
+        # with open(f"{job_id}.task_status.json", "w") as fp:
         #    json.dump(self.workflow_jobs, fp, indent=4)
 
 
